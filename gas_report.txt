@@ -1,0 +1,698 @@
+No files changed, compilation skipped
+
+Ran 44 tests for test/AgentEscrow.t.sol:AgentEscrowTest
+[PASS] test_CanUseCredit() (gas: 194453)
+[PASS] test_Constructor() (gas: 46348)
+[PASS] test_Constructor_RevertZeroArbiter() (gas: 277729)
+[PASS] test_Constructor_RevertZeroInsurancePool() (gas: 277706)
+[PASS] test_Constructor_RevertZeroReputation() (gas: 277386)
+[PASS] test_Constructor_RevertZeroStakeManager() (gas: 278092)
+[PASS] test_CreateIntent() (gas: 189770)
+[PASS] test_CreateIntent_MultipleIntents() (gas: 261764)
+[PASS] test_Debug_MaxBondIsSet() (gas: 10243)
+[PASS] test_ExpireCredit() (gas: 224151)
+[PASS] test_ExpireCredit_RevertNotExpired() (gas: 207247)
+[FAIL: EvmError: Revert] test_ExpireIntent() (gas: 283419)
+[FAIL: EvmError: Revert] test_ExpireIntent_RevertDeadlineNotExpired() (gas: 283072)
+[PASS] test_ExpireIntent_RevertWrongState() (gas: 190011)
+[FAIL: EvmError: Revert] test_FullLifecycle_Dispute() (gas: 283463)
+[FAIL: EvmError: Revert] test_FullLifecycle_Success() (gas: 282959)
+[PASS] test_FullLifecycle_WithCredit() (gas: 550008)
+[PASS] test_GrantCredit() (gas: 196562)
+[PASS] test_GrantCredit_RevertInsufficientReputation() (gas: 89866)
+[PASS] test_GrantCredit_RevertZeroAmount() (gas: 90464)
+[FAIL: EvmError: Revert] test_InitiateDispute() (gas: 283576)
+[FAIL: EvmError: Revert] test_InitiateDispute_RevertAlreadyExists() (gas: 283794)
+[FAIL: EvmError: Revert] test_InitiateDispute_RevertDeadlineExpired() (gas: 283254)
+[FAIL: EvmError: Revert] test_InitiateDispute_RevertNotPayer() (gas: 283121)
+[PASS] test_InitiateDispute_RevertWrongState() (gas: 201253)
+[FAIL: EvmError: Revert] test_ResolveDispute_PayerWins() (gas: 283911)
+[FAIL: EvmError: Revert] test_ResolveDispute_ProviderWins() (gas: 283769)
+[FAIL: EvmError: Revert] test_ResolveDispute_RevertInvalidWinner() (gas: 282541)
+[FAIL: EvmError: Revert] test_ResolveDispute_RevertNotArbiter() (gas: 283745)
+[FAIL: EvmError: Revert] test_ResolveDispute_RevertSlashExceedsBond() (gas: 283302)
+[FAIL: EvmError: Revert] test_ResolveDispute_RevertWrongState() (gas: 282661)
+[FAIL: EvmError: Revert] test_RevealIntent() (gas: 283236)
+[PASS] test_RevealIntent_RevertBondExceedsAmount() (gas: 203705)
+[PASS] test_RevealIntent_RevertBondExceedsMax() (gas: 202149)
+[PASS] test_RevealIntent_RevertDeadlineExpired() (gas: 200353)
+[PASS] test_RevealIntent_RevertInvalidHash() (gas: 203436)
+[PASS] test_RevealIntent_RevertNotPayer() (gas: 200956)
+[FAIL: EvmError: Revert] test_RevealIntent_RevertWrongState() (gas: 283843)
+[PASS] test_RevealIntent_WithCredit() (gas: 476889)
+[FAIL: EvmError: Revert] test_SettleIntent() (gas: 283143)
+[FAIL: EvmError: Revert] test_SettleIntent_RevertDeadlineExpired() (gas: 283188)
+[FAIL: EvmError: Revert] test_SettleIntent_RevertNotProvider() (gas: 283625)
+[PASS] test_SettleIntent_RevertWrongState() (gas: 196971)
+[FAIL: EvmError: Revert] test_SettleIntent_RevertZeroGain() (gas: 282776)
+Suite result: FAILED. 24 passed; 20 failed; 0 skipped; finished in 5.68ms (4.65ms CPU time)
+
+Ran 17 tests for test/ReputationRegistry.t.sol:ReputationRegistryTest
+[PASS] testFuzz_GetCurrentEpoch_AlwaysMultipleOf28Days(uint256) (runs: 256, μ: 9171, ~: 9123)
+[PASS] testFuzz_RecordSuccess_NeverExceedsMax(uint16,uint16) (runs: 256, μ: 86527, ~: 86535)
+[PASS] test_Constructor() (gas: 17459)
+[PASS] test_Constructor_RevertZeroEscrow() (gas: 110664)
+[PASS] test_GetCurrentEpoch() (gas: 42297)
+[PASS] test_RecordSuccess_Accumulates() (gas: 132724)
+[PASS] test_RecordSuccess_Basic() (gas: 104178)
+[PASS] test_RecordSuccess_CounterpartyCapExact() (gas: 95777)
+[PASS] test_RecordSuccess_CounterpartyCapExceeded_Clamped() (gas: 159579)
+[PASS] test_RecordSuccess_CounterpartyCapExhausted() (gas: 141092)
+[PASS] test_RecordSuccess_CounterpartyCapResetsNextEpoch() (gas: 164106)
+[PASS] test_RecordSuccess_MultiplePayers() (gas: 155166)
+[PASS] test_RecordSuccess_RevertNonEscrow() (gas: 34883)
+[PASS] test_RecordSuccess_RevertZeroGain() (gas: 37638)
+[PASS] test_RecordSuccess_RevertZeroPayer() (gas: 35047)
+[PASS] test_RecordSuccess_RevertZeroProvider() (gas: 34908)
+[PASS] test_RecordSuccess_ScoreSaturatesAtMax() (gas: 1161375)
+Suite result: ok. 17 passed; 0 failed; 0 skipped; finished in 50.46ms (50.19ms CPU time)
+
+Ran 39 tests for test/InsurancePool.t.sol:InsurancePoolTest
+[PASS] testFuzz_Claim_AgeRampLinear(uint256) (runs: 256, μ: 472320, ~: 474446)
+[PASS] test_AuthorizeClaim() (gas: 184571)
+[PASS] test_AuthorizeClaim_RevertAlreadyAuthorized() (gas: 189602)
+[PASS] test_AuthorizeClaim_RevertExceedsIntentAmount() (gas: 43868)
+[PASS] test_AuthorizeClaim_RevertTokenNotSupported() (gas: 43165)
+[PASS] test_AuthorizeClaim_RevertUnauthorized() (gas: 43630)
+[PASS] test_AuthorizeClaim_RevertZeroAmount() (gas: 42821)
+[PASS] test_Claim_AgeRamp_Full() (gas: 473534)
+[PASS] test_Claim_AgeRamp_Partial() (gas: 730587)
+[PASS] test_Claim_AgeRamp_Zero() (gas: 347708)
+[PASS] test_Claim_BucketSnapshotImmutable() (gas: 722759)
+[PASS] test_Claim_ByClaimId() (gas: 421105)
+[PASS] test_Claim_CapResetsNextEpoch() (gas: 735664)
+[PASS] test_Claim_DayCapEnforced() (gas: 335061)
+[PASS] test_Claim_EpochCapEnforced() (gas: 334706)
+[PASS] test_Claim_InitializesBuckets() (gas: 439421)
+[PASS] test_Claim_PayerEpochCapEnforced() (gas: 342087)
+[PASS] test_Claim_ProviderDayCapEnforced() (gas: 930901)
+[PASS] test_Claim_RevertExpired() (gas: 279884)
+[PASS] test_Claim_RevertInsufficientBalance() (gas: 200082)
+[PASS] test_Claim_RevertNotAuthorized() (gas: 42643)
+[PASS] test_Claim_RevertNotPayer() (gas: 278472)
+[PASS] test_Claim_Success() (gas: 454662)
+[PASS] test_Constructor() (gas: 26752)
+[PASS] test_Constructor_RevertZeroEscrow() (gas: 212217)
+[PASS] test_Constructor_RevertZeroStakeManager() (gas: 212217)
+[PASS] test_Deposit() (gas: 104876)
+[PASS] test_Deposit_Multiple() (gas: 144087)
+[PASS] test_Deposit_RevertZeroAmount() (gas: 40292)
+[PASS] test_Deposit_RevertZeroToken() (gas: 38354)
+[PASS] test_ExpireClaim() (gas: 200457)
+[PASS] test_ExpireClaim_RevertNotAuthorized() (gas: 32634)
+[PASS] test_ExpireClaim_RevertNotExpired() (gas: 185545)
+[PASS] test_FullLifecycle_SingleClaim() (gas: 454931)
+[PASS] test_MultipleClaims_SameDay() (gas: 734992)
+[PASS] test_NotifyDepositFromStake_FromEscrow() (gas: 159599)
+[PASS] test_NotifyDepositFromStake_FromStakeManager() (gas: 120107)
+[PASS] test_NotifyDepositFromStake_RevertUnauthorized() (gas: 33715)
+[PASS] test_NotifyDepositFromStake_RevertZeroAmount() (gas: 35990)
+Suite result: ok. 39 passed; 0 failed; 0 skipped; finished in 149.31ms (151.28ms CPU time)
+
+Ran 4 tests for test/invariants/StakeManagerInvariants.t.sol:StakeManagerInvariantsTest
+[PASS] invariant_AccountingConsistent() (runs: 256, calls: 3840, reverts: 0)
+
+╭---------------------+---------------+-------+---------+----------╮
+| Contract            | Selector      | Calls | Reverts | Discards |
++==================================================================+
+| StakeManagerHandler | depositStake  | 775   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | lockStake     | 727   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | slash         | 751   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | unlockStake   | 810   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | withdrawStake | 777   | 0       | 0        |
+╰---------------------+---------------+-------+---------+----------╯
+
+[PASS] invariant_ContractBalanceSufficient() (runs: 256, calls: 3840, reverts: 0)
+
+╭---------------------+---------------+-------+---------+----------╮
+| Contract            | Selector      | Calls | Reverts | Discards |
++==================================================================+
+| StakeManagerHandler | depositStake  | 760   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | lockStake     | 765   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | slash         | 778   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | unlockStake   | 770   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | withdrawStake | 767   | 0       | 0        |
+╰---------------------+---------------+-------+---------+----------╯
+
+[PASS] invariant_LockedNeverExceedsTotal() (runs: 256, calls: 3840, reverts: 0)
+
+╭---------------------+---------------+-------+---------+----------╮
+| Contract            | Selector      | Calls | Reverts | Discards |
++==================================================================+
+| StakeManagerHandler | depositStake  | 754   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | lockStake     | 788   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | slash         | 743   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | unlockStake   | 773   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | withdrawStake | 782   | 0       | 0        |
+╰---------------------+---------------+-------+---------+----------╯
+
+[PASS] invariant_TotalEqualsLockedPlusAvailable() (runs: 256, calls: 3840, reverts: 0)
+
+╭---------------------+---------------+-------+---------+----------╮
+| Contract            | Selector      | Calls | Reverts | Discards |
++==================================================================+
+| StakeManagerHandler | depositStake  | 778   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | lockStake     | 831   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | slash         | 701   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | unlockStake   | 766   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | withdrawStake | 764   | 0       | 0        |
+╰---------------------+---------------+-------+---------+----------╯
+
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 1.55s (2.72s CPU time)
+
+Ran 2 tests for test/Counter.t.sol:CounterTest
+[PASS] testFuzz_SetNumber(uint256) (runs: 256, μ: 51250, ~: 51660)
+[PASS] test_Increment() (gas: 51473)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 1.56s (1.56s CPU time)
+
+Ran 37 tests for test/StakeManager.t.sol:StakeManagerTest
+[PASS] testFuzz_AvailableStakeAlwaysCorrect(uint256,uint256) (runs: 256, μ: 229341, ~: 233301)
+[PASS] testFuzz_DepositWithdraw(uint256) (runs: 256, μ: 136229, ~: 136076)
+[PASS] testFuzz_SlashNeverExceedsCap(uint96,uint96) (runs: 256, μ: 275895, ~: 247952)
+[PASS] test_Constructor() (gas: 16819)
+[PASS] test_Constructor_RevertZeroEscrow() (gas: 167586)
+[PASS] test_Constructor_RevertZeroInsurancePool() (gas: 167096)
+[PASS] test_DepositStake() (gas: 113331)
+[PASS] test_DepositStake_Multiple() (gas: 144354)
+[PASS] test_DepositStake_RevertZeroAmount() (gas: 40229)
+[PASS] test_DepositStake_RevertZeroToken() (gas: 37715)
+[PASS] test_FullLifecycle() (gas: 331032)
+[PASS] test_FullLifecycle_WithSlash() (gas: 416542)
+[PASS] test_LockStake() (gas: 249462)
+[PASS] test_LockStake_Multiple() (gas: 330846)
+[PASS] test_LockStake_RevertInsufficientStake() (gas: 129751)
+[PASS] test_LockStake_RevertLockAlreadyExists() (gas: 242400)
+[PASS] test_LockStake_RevertNonEscrow() (gas: 120144)
+[PASS] test_LockStake_RevertZeroAmount() (gas: 40146)
+[PASS] test_LockStake_RevertZeroProvider() (gas: 37861)
+[PASS] test_LockStake_RevertZeroToken() (gas: 38477)
+[PASS] test_MultipleProviders() (gas: 320533)
+[PASS] test_Slash() (gas: 357521)
+[PASS] test_Slash_ExactlyCap() (gas: 323033)
+[PASS] test_Slash_RevertExceedsCap() (gas: 246242)
+[PASS] test_Slash_RevertLockNotActive() (gas: 268358)
+[PASS] test_Slash_RevertLockNotFound() (gas: 37266)
+[PASS] test_Slash_RevertNonEscrow() (gas: 33803)
+[PASS] test_Slash_RevertZeroAmount() (gas: 239635)
+[PASS] test_UnlockStake() (gas: 267313)
+[PASS] test_UnlockStake_Idempotent() (gas: 269313)
+[PASS] test_UnlockStake_NonExistent() (gas: 36543)
+[PASS] test_UnlockStake_RevertNonEscrow() (gas: 32967)
+[PASS] test_WithdrawStake() (gas: 153256)
+[PASS] test_WithdrawStake_Full() (gas: 135691)
+[PASS] test_WithdrawStake_RevertInsufficientStake() (gas: 127680)
+[PASS] test_WithdrawStake_RevertWithLocked() (gas: 249734)
+[PASS] test_WithdrawStake_SuccessWithLocked() (gas: 281817)
+Suite result: ok. 37 passed; 0 failed; 0 skipped; finished in 1.62s (1.62s CPU time)
+
+Ran 4 tests for test/invariants/InsurancePoolInvariants.t.sol:InsurancePoolInvariantsTest
+[PASS] invariant_AccountingConsistent() (runs: 256, calls: 3840, reverts: 0)
+
+╭----------------------+----------------+-------+---------+----------╮
+| Contract             | Selector       | Calls | Reverts | Discards |
++====================================================================+
+| InsurancePoolHandler | authorizeClaim | 955   | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | deposit        | 969   | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | executeClaim   | 964   | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | warpTime       | 952   | 0       | 0        |
+╰----------------------+----------------+-------+---------+----------╯
+
+[PASS] invariant_BucketOpeningBalancesImmutable() (runs: 256, calls: 3840, reverts: 0)
+
+╭----------------------+----------------+-------+---------+----------╮
+| Contract             | Selector       | Calls | Reverts | Discards |
++====================================================================+
+| InsurancePoolHandler | authorizeClaim | 948   | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | deposit        | 983   | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | executeClaim   | 946   | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | warpTime       | 963   | 0       | 0        |
+╰----------------------+----------------+-------+---------+----------╯
+
+[PASS] invariant_ClaimedNeverExceedsRequested() (runs: 256, calls: 3840, reverts: 0)
+
+╭----------------------+----------------+-------+---------+----------╮
+| Contract             | Selector       | Calls | Reverts | Discards |
++====================================================================+
+| InsurancePoolHandler | authorizeClaim | 1018  | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | deposit        | 903   | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | executeClaim   | 941   | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | warpTime       | 978   | 0       | 0        |
+╰----------------------+----------------+-------+---------+----------╯
+
+[PASS] invariant_PoolBalanceSufficient() (runs: 256, calls: 3840, reverts: 0)
+
+╭----------------------+----------------+-------+---------+----------╮
+| Contract             | Selector       | Calls | Reverts | Discards |
++====================================================================+
+| InsurancePoolHandler | authorizeClaim | 942   | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | deposit        | 965   | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | executeClaim   | 979   | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | warpTime       | 954   | 0       | 0        |
+╰----------------------+----------------+-------+---------+----------╯
+
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 2.48s (3.59s CPU time)
+
+Ran 3 tests for test/invariants/ReputationInvariants.t.sol:ReputationInvariantsTest
+[PASS] invariant_CounterpartyGainsNeverExceedCap() (runs: 256, calls: 3840, reverts: 0)
+
+╭-------------------+---------------+-------+---------+----------╮
+| Contract          | Selector      | Calls | Reverts | Discards |
++================================================================+
+| ReputationHandler | recordSuccess | 1899  | 0       | 0        |
+|-------------------+---------------+-------+---------+----------|
+| ReputationHandler | warpTime      | 1941  | 0       | 0        |
+╰-------------------+---------------+-------+---------+----------╯
+
+[PASS] invariant_EpochIsMultipleOf28Days() (runs: 256, calls: 3840, reverts: 0)
+
+╭-------------------+---------------+-------+---------+----------╮
+| Contract          | Selector      | Calls | Reverts | Discards |
++================================================================+
+| ReputationHandler | recordSuccess | 1926  | 0       | 0        |
+|-------------------+---------------+-------+---------+----------|
+| ReputationHandler | warpTime      | 1914  | 0       | 0        |
+╰-------------------+---------------+-------+---------+----------╯
+
+[PASS] invariant_ScoreNeverExceedsMax() (runs: 256, calls: 3840, reverts: 0)
+
+╭-------------------+---------------+-------+---------+----------╮
+| Contract          | Selector      | Calls | Reverts | Discards |
++================================================================+
+| ReputationHandler | recordSuccess | 1899  | 0       | 0        |
+|-------------------+---------------+-------+---------+----------|
+| ReputationHandler | warpTime      | 1941  | 0       | 0        |
+╰-------------------+---------------+-------+---------+----------╯
+
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 3.08s (4.16s CPU time)
+
+╭------------------------------------------+-----------------+--------+--------+--------+---------╮
+| src/AgentEscrow.sol:AgentEscrow Contract |                 |        |        |        |         |
++=================================================================================================+
+| Deployment Cost                          | Deployment Size |        |        |        |         |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| 2183138                                  | 10278           |        |        |        |         |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+|                                          |                 |        |        |        |         |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| Function Name                            | Min             | Avg    | Median | Max    | # Calls |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| CREDIT_EXPIRY                            | 249             | 249    | 249    | 249    | 1       |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| DISPUTE_DEADLINE                         | 821             | 821    | 821    | 821    | 1       |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| FASTMODE_THRESHOLD                       | 381             | 381    | 381    | 381    | 1       |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| FINALITY_GATE                            | 491             | 491    | 491    | 491    | 1       |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| MAX_BOND_PER_TOKEN                       | 2484            | 2484   | 2484   | 2484   | 1       |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| REVEAL_DEADLINE                          | 271             | 271    | 271    | 271    | 1       |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| SETTLEMENT_DEADLINE                      | 733             | 733    | 733    | 733    | 1       |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| arbiter                                  | 859             | 859    | 859    | 859    | 1       |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| canUseCredit                             | 5410            | 5435   | 5435   | 5461   | 2       |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| createIntent                             | 108792          | 144817 | 145944 | 145944 | 33      |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| expireCredit                             | 24544           | 26709  | 26709  | 28874  | 2       |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| expireIntent                             | 24251           | 24251  | 24251  | 24251  | 1       |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| firstSeen                                | 3033            | 3033   | 3033   | 3033   | 1       |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| getCredit                                | 10067           | 10067  | 10067  | 10067  | 2       |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| getIntent                                | 14764           | 14764  | 14764  | 14764  | 3       |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| grantCredit                              | 28118           | 97572  | 120713 | 120713 | 8       |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| initiateDispute                          | 34447           | 34447  | 34447  | 34447  | 1       |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| insurancePool                            | 644             | 644    | 644    | 644    | 1       |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| reputationRegistry                       | 732             | 732    | 732    | 732    | 1       |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| revealIntent                             | 30890           | 99477  | 113618 | 118988 | 27      |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| setMaxBondPerToken                       | 44360           | 44360  | 44360  | 44360  | 44      |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| setMaxPayerPayoutPerToken                | 44250           | 44250  | 44250  | 44250  | 44      |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| settleIntent                             | 29716           | 55886  | 55886  | 82056  | 2       |
+|------------------------------------------+-----------------+--------+--------+--------+---------|
+| stakeManager                             | 490             | 490    | 490    | 490    | 1       |
+╰------------------------------------------+-----------------+--------+--------+--------+---------╯
+
+╭----------------------------------+-----------------+-------+--------+-------+---------╮
+| src/Counter.sol:Counter Contract |                 |       |        |       |         |
++=======================================================================================+
+| Deployment Cost                  | Deployment Size |       |        |       |         |
+|----------------------------------+-----------------+-------+--------+-------+---------|
+| 98819                            | 236             |       |        |       |         |
+|----------------------------------+-----------------+-------+--------+-------+---------|
+|                                  |                 |       |        |       |         |
+|----------------------------------+-----------------+-------+--------+-------+---------|
+| Function Name                    | Min             | Avg   | Median | Max   | # Calls |
+|----------------------------------+-----------------+-------+--------+-------+---------|
+| increment                        | 43368           | 43368 | 43368  | 43368 | 1       |
+|----------------------------------+-----------------+-------+--------+-------+---------|
+| number                           | 2269            | 2269  | 2269   | 2269  | 257     |
+|----------------------------------+-----------------+-------+--------+-------+---------|
+| setNumber                        | 23528           | 42950 | 43506  | 43812 | 258     |
+╰----------------------------------+-----------------+-------+--------+-------+---------╯
+
+╭----------------------------------------------+-----------------+--------+--------+--------+---------╮
+| src/InsurancePool.sol:InsurancePool Contract |                 |        |        |        |         |
++=====================================================================================================+
+| Deployment Cost                              | Deployment Size |        |        |        |         |
+|----------------------------------------------+-----------------+--------+--------+--------+---------|
+| 1364167                                      | 6285            |        |        |        |         |
+|----------------------------------------------+-----------------+--------+--------+--------+---------|
+|                                              |                 |        |        |        |         |
+|----------------------------------------------+-----------------+--------+--------+--------+---------|
+| Function Name                                | Min             | Avg    | Median | Max    | # Calls |
+|----------------------------------------------+-----------------+--------+--------+--------+---------|
+| CLAIM_TTL                                    | 157             | 157    | 157    | 157    | 1       |
+|----------------------------------------------+-----------------+--------+--------+--------+---------|
+| DAY_SECONDS                                  | 296             | 296    | 296    | 296    | 1       |
+|----------------------------------------------+-----------------+--------+--------+--------+---------|
+| EPOCH_SECONDS                                | 274             | 274    | 274    | 274    | 1       |
+|----------------------------------------------+-----------------+--------+--------+--------+---------|
+| RAMP_SECONDS                                 | 538             | 538    | 538    | 538    | 1       |
+|----------------------------------------------+-----------------+--------+--------+--------+---------|
+| authorizeClaim                               | 23447           | 140230 | 140375 | 140399 | 4166    |
+|----------------------------------------------+-----------------+--------+--------+--------+---------|
+| claim                                        | 29282           | 88394  | 88992  | 186912 | 3104    |
+|----------------------------------------------+-----------------+--------+--------+--------+---------|
+| claimById                                    | 167599          | 167599 | 167599 | 167599 | 1       |
+|----------------------------------------------+-----------------+--------+--------+--------+---------|
+| claimIdByIntent                              | 2728            | 2728   | 2728   | 2728   | 2840    |
+|----------------------------------------------+-----------------+--------+--------+--------+---------|
+| deposit                                      | 26839           | 54981  | 44289  | 83598  | 4115    |
+|----------------------------------------------+-----------------+--------+--------+--------+---------|
+| escrow                                       | 622             | 622    | 622    | 622    | 1       |
+|----------------------------------------------+-----------------+--------+--------+--------+---------|
+| expireClaim                                  | 24234           | 25760  | 24313  | 28733  | 3       |
+|----------------------------------------------+-----------------+--------+--------+--------+---------|
+| getClaim                                     | 9736            | 9736   | 9736   | 9736   | 2844    |
+|----------------------------------------------+-----------------+--------+--------+--------+---------|
+| getDayBucket                                 | 3137            | 3137   | 3137   | 3137   | 2       |
+|----------------------------------------------+-----------------+--------+--------+--------+---------|
+| getEpochBucket                               | 2898            | 2898   | 2898   | 2898   | 6       |
+|----------------------------------------------+-----------------+--------+--------+--------+---------|
+| notifyDepositFromStake                       | 22382           | 34453  | 34470  | 46493  | 4       |
+|----------------------------------------------+-----------------+--------+--------+--------+---------|
+| poolBalance                                  | 2574            | 2574   | 2574   | 2574   | 8       |
+|----------------------------------------------+-----------------+--------+--------+--------+---------|
+| setMaxPayerPayoutPerToken                    | 27048           | 43759  | 44148  | 44148  | 44      |
+|----------------------------------------------+-----------------+--------+--------+--------+---------|
+| stakeManager                                 | 380             | 380    | 380    | 380    | 1       |
+╰----------------------------------------------+-----------------+--------+--------+--------+---------╯
+
+╭--------------------------------------------------------+-----------------+-------+--------+-------+---------╮
+| src/ReputationRegistry.sol:ReputationRegistry Contract |                 |       |        |       |         |
++=============================================================================================================+
+| Deployment Cost                                        | Deployment Size |       |        |       |         |
+|--------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| 312735                                                 | 1416            |       |        |       |         |
+|--------------------------------------------------------+-----------------+-------+--------+-------+---------|
+|                                                        |                 |       |        |       |         |
+|--------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| Function Name                                          | Min             | Avg   | Median | Max   | # Calls |
+|--------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| EPOCH_SECONDS                                          | 235             | 235   | 235    | 235   | 1       |
+|--------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| MAX_COUNTERPARTY_GAIN_PER_EPOCH                        | 213             | 213   | 213    | 213   | 1       |
+|--------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| MAX_SCORE                                              | 191             | 191   | 191    | 191   | 1       |
+|--------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| escrow                                                 | 358             | 358   | 358    | 358   | 1       |
+|--------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| getCounterpartyGains                                   | 2816            | 2816  | 2816   | 2816  | 50      |
+|--------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| getCurrentEpoch                                        | 397             | 397   | 397    | 397   | 265     |
+|--------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| getScore                                               | 2584            | 2584  | 2584   | 2584  | 272     |
+|--------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| recordSuccess                                          | 21928           | 67854 | 69562  | 69586 | 6035    |
+╰--------------------------------------------------------+-----------------+-------+--------+-------+---------╯
+
+╭--------------------------------------------+-----------------+--------+--------+--------+---------╮
+| src/StakeManager.sol:StakeManager Contract |                 |        |        |        |         |
++===================================================================================================+
+| Deployment Cost                            | Deployment Size |        |        |        |         |
+|--------------------------------------------+-----------------+--------+--------+--------+---------|
+| 767422                                     | 3494            |        |        |        |         |
+|--------------------------------------------+-----------------+--------+--------+--------+---------|
+|                                            |                 |        |        |        |         |
+|--------------------------------------------+-----------------+--------+--------+--------+---------|
+| Function Name                              | Min             | Avg    | Median | Max    | # Calls |
+|--------------------------------------------+-----------------+--------+--------+--------+---------|
+| MAX_SLASH_BPS                              | 207             | 207    | 207    | 207    | 1       |
+|--------------------------------------------+-----------------+--------+--------+--------+---------|
+| availableStake                             | 4833            | 4833   | 4833   | 4833   | 4481    |
+|--------------------------------------------+-----------------+--------+--------+--------+---------|
+| depositStake                               | 26808           | 73678  | 66521  | 83621  | 3872    |
+|--------------------------------------------+-----------------+--------+--------+--------+---------|
+| escrow                                     | 401             | 401    | 401    | 401    | 1       |
+|--------------------------------------------+-----------------+--------+--------+--------+---------|
+| insurancePool                              | 313             | 313    | 313    | 313    | 1       |
+|--------------------------------------------+-----------------+--------+--------+--------+---------|
+| intentLocks                                | 7171            | 7171   | 7171   | 7171   | 2988    |
+|--------------------------------------------+-----------------+--------+--------+--------+---------|
+| lockStake                                  | 22586           | 110598 | 116717 | 116825 | 2640    |
+|--------------------------------------------+-----------------+--------+--------+--------+---------|
+| lockedStake                                | 2727            | 2727   | 2727   | 2727   | 269     |
+|--------------------------------------------+-----------------+--------+--------+--------+---------|
+| slash                                      | 21965           | 54058  | 28618  | 102795 | 264     |
+|--------------------------------------------+-----------------+--------+--------+--------+---------|
+| totalStake                                 | 2683            | 2683   | 2683   | 2683   | 531     |
+|--------------------------------------------+-----------------+--------+--------+--------+---------|
+| unlockStake                                | 22000           | 24159  | 24235  | 33936  | 3144    |
+|--------------------------------------------+-----------------+--------+--------+--------+---------|
+| withdrawStake                              | 31751           | 49077  | 49881  | 57441  | 2359    |
+╰--------------------------------------------+-----------------+--------+--------+--------+---------╯
+
+╭-----------------------------------------------------------------------------+-----------------+--------+--------+--------+---------╮
+| test/invariants/InsurancePoolInvariants.t.sol:InsurancePoolHandler Contract |                 |        |        |        |         |
++====================================================================================================================================+
+| Deployment Cost                                                             | Deployment Size |        |        |        |         |
+|-----------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| 1876674                                                                     | 8323            |        |        |        |         |
+|-----------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+|                                                                             |                 |        |        |        |         |
+|-----------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| Function Name                                                               | Min             | Avg    | Median | Max    | # Calls |
+|-----------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| authorizeClaim                                                              | 190431          | 342337 | 332725 | 401161 | 3878    |
+|-----------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| deposit                                                                     | 160981          | 178960 | 161296 | 228380 | 3837    |
+|-----------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| executeClaim                                                                | 3004            | 84416  | 123127 | 243326 | 3849    |
+|-----------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getIntent                                                                   | 4811            | 4811   | 4811   | 4811   | 3       |
+|-----------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| ghost_totalClaimed                                                          | 2869            | 2869   | 2869   | 2869   | 1       |
+|-----------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| ghost_totalDeposited                                                        | 2693            | 2693   | 2693   | 2693   | 1       |
+|-----------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| intentsCount                                                                | 2534            | 2534   | 2534   | 2534   | 1       |
+|-----------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| warpTime                                                                    | 3587            | 3712   | 3784   | 3784   | 3856    |
+╰-----------------------------------------------------------------------------+-----------------+--------+--------+--------+---------╯
+
+╭-----------------------------------------------------------------------+-----------------+--------+--------+--------+---------╮
+| test/invariants/ReputationInvariants.t.sol:ReputationHandler Contract |                 |        |        |        |         |
++==============================================================================================================================+
+| Deployment Cost                                                       | Deployment Size |        |        |        |         |
+|-----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| 1283910                                                               | 5638            |        |        |        |         |
+|-----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+|                                                                       |                 |        |        |        |         |
+|-----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| Function Name                                                         | Min             | Avg    | Median | Max    | # Calls |
+|-----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getPayer                                                              | 4983            | 4983   | 4983   | 4983   | 42      |
+|-----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getProvider                                                           | 4636            | 4636   | 4636   | 4636   | 12      |
+|-----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| payersCount                                                           | 2386            | 2386   | 2386   | 2386   | 1       |
+|-----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| providersCount                                                        | 2675            | 2675   | 2675   | 2675   | 2       |
+|-----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| recordSuccess                                                         | 44915           | 173527 | 180085 | 214300 | 5742    |
+|-----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| warpTime                                                              | 3473            | 3593   | 3670   | 3670   | 5823    |
+╰-----------------------------------------------------------------------+-----------------+--------+--------+--------+---------╯
+
+╭---------------------------------------------------------------------------+-----------------+--------+--------+--------+---------╮
+| test/invariants/StakeManagerInvariants.t.sol:StakeManagerHandler Contract |                 |        |        |        |         |
++==================================================================================================================================+
+| Deployment Cost                                                           | Deployment Size |        |        |        |         |
+|---------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| 1808148                                                                   | 8007            |        |        |        |         |
+|---------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+|                                                                           |                 |        |        |        |         |
+|---------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| Function Name                                                             | Min             | Avg    | Median | Max    | # Calls |
+|---------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| depositStake                                                              | 67653           | 247952 | 233796 | 302208 | 3078    |
+|---------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getProvider                                                               | 4674            | 4674   | 4674   | 4674   | 7       |
+|---------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| ghost_totalDeposits                                                       | 2425            | 2425   | 2425   | 2425   | 1       |
+|---------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| ghost_totalSlashed                                                        | 2735            | 2735   | 2735   | 2735   | 1       |
+|---------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| ghost_totalWithdrawals                                                    | 2359            | 2359   | 2359   | 2359   | 1       |
+|---------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| lockStake                                                                 | 2453            | 102665 | 133958 | 168544 | 3123    |
+|---------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| providersCount                                                            | 2757            | 2757   | 2757   | 2757   | 3       |
+|---------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| slash                                                                     | 10433           | 12932  | 12933  | 12933  | 2985    |
+|---------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| unlockStake                                                               | 34637           | 34923  | 35009  | 44710  | 3136    |
+|---------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| withdrawStake                                                             | 2656            | 61387  | 82283  | 99793  | 3098    |
+╰---------------------------------------------------------------------------+-----------------+--------+--------+--------+---------╯
+
+╭---------------------------------------------------------+-----------------+-------+--------+-------+---------╮
+| test/mocks/MockAgentEscrow.sol:MockAgentEscrow Contract |                 |       |        |       |         |
++==============================================================================================================+
+| Deployment Cost                                         | Deployment Size |       |        |       |         |
+|---------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| 134119                                                  | 401             |       |        |       |         |
+|---------------------------------------------------------+-----------------+-------+--------+-------+---------|
+|                                                         |                 |       |        |       |         |
+|---------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| Function Name                                           | Min             | Avg   | Median | Max   | # Calls |
+|---------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| firstSeen                                               | 2450            | 2450  | 2450   | 2450  | 352     |
+|---------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| setFirstSeen                                            | 43816           | 43834 | 43840  | 43852 | 3953    |
+╰---------------------------------------------------------+-----------------+-------+--------+-------+---------╯
+
+╭---------------------------------------------+-----------------+-------+--------+-------+---------╮
+| test/mocks/MockERC20.sol:MockERC20 Contract |                 |       |        |       |         |
++==================================================================================================+
+| Deployment Cost                             | Deployment Size |       |        |       |         |
+|---------------------------------------------+-----------------+-------+--------+-------+---------|
+| 583210                                      | 3248            |       |        |       |         |
+|---------------------------------------------+-----------------+-------+--------+-------+---------|
+|                                             |                 |       |        |       |         |
+|---------------------------------------------+-----------------+-------+--------+-------+---------|
+| Function Name                               | Min             | Avg   | Median | Max   | # Calls |
+|---------------------------------------------+-----------------+-------+--------+-------+---------|
+| approve                                     | 45971           | 46129 | 46007  | 46283 | 6968    |
+|---------------------------------------------+-----------------+-------+--------+-------+---------|
+| balanceOf                                   | 2552            | 2552  | 2552   | 2552  | 356     |
+|---------------------------------------------+-----------------+-------+--------+-------+---------|
+| mint                                        | 50792           | 55953 | 50828  | 67940 | 7052    |
+|---------------------------------------------+-----------------+-------+--------+-------+---------|
+| transfer                                    | 46500           | 48900 | 48900  | 51300 | 2       |
+╰---------------------------------------------+-----------------+-------+--------+-------+---------╯
+
+╭-------------------------------------------------------------+-----------------+------+--------+------+---------╮
+| test/mocks/MockInsurancePool.sol:MockInsurancePool Contract |                 |      |        |      |         |
++================================================================================================================+
+| Deployment Cost                                             | Deployment Size |      |        |      |         |
+|-------------------------------------------------------------+-----------------+------+--------+------+---------|
+| 175555                                                      | 593             |      |        |      |         |
+|-------------------------------------------------------------+-----------------+------+--------+------+---------|
+|                                                             |                 |      |        |      |         |
+|-------------------------------------------------------------+-----------------+------+--------+------+---------|
+| Function Name                                               | Min             | Avg  | Median | Max  | # Calls |
+|-------------------------------------------------------------+-----------------+------+--------+------+---------|
+| notifiedAmount                                              | 2291            | 2291 | 2291   | 2291 | 1       |
+╰-------------------------------------------------------------+-----------------+------+--------+------+---------╯
+
+╭-----------------------------------------------------------------------+-----------------+-------+--------+-------+---------╮
+| test/mocks/MockReputationRegistry.sol:MockReputationRegistry Contract |                 |       |        |       |         |
++============================================================================================================================+
+| Deployment Cost                                                       | Deployment Size |       |        |       |         |
+|-----------------------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| 147647                                                                | 464             |       |        |       |         |
+|-----------------------------------------------------------------------+-----------------+-------+--------+-------+---------|
+|                                                                       |                 |       |        |       |         |
+|-----------------------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| Function Name                                                         | Min             | Avg   | Median | Max   | # Calls |
+|-----------------------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| getScore                                                              | 2501            | 2501  | 2501   | 2501  | 8       |
+|-----------------------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| setScore                                                              | 43826           | 43826 | 43826  | 43826 | 8       |
+╰-----------------------------------------------------------------------+-----------------+-------+--------+-------+---------╯
+
+╭-----------------------------------------------------------+-----------------+------+--------+------+---------╮
+| test/mocks/MockStakeManager.sol:MockStakeManager Contract |                 |      |        |      |         |
++==============================================================================================================+
+| Deployment Cost                                           | Deployment Size |      |        |      |         |
+|-----------------------------------------------------------+-----------------+------+--------+------+---------|
+| 166799                                                    | 553             |      |        |      |         |
+|-----------------------------------------------------------+-----------------+------+--------+------+---------|
+|                                                           |                 |      |        |      |         |
+|-----------------------------------------------------------+-----------------+------+--------+------+---------|
+| Function Name                                             | Min             | Avg  | Median | Max  | # Calls |
+|-----------------------------------------------------------+-----------------+------+--------+------+---------|
+| wasLockCalled                                             | 2322            | 2322 | 2322   | 2322 | 1       |
+╰-----------------------------------------------------------+-----------------+------+--------+------+---------╯
+
+
+Ran 8 test suites in 3.22s (10.50s CPU time): 130 tests passed, 20 failed, 0 skipped (150 total tests)
+
+Failing tests:
+Encountered 20 failing tests in test/AgentEscrow.t.sol:AgentEscrowTest
+[FAIL: EvmError: Revert] test_ExpireIntent() (gas: 283419)
+[FAIL: EvmError: Revert] test_ExpireIntent_RevertDeadlineNotExpired() (gas: 283072)
+[FAIL: EvmError: Revert] test_FullLifecycle_Dispute() (gas: 283463)
+[FAIL: EvmError: Revert] test_FullLifecycle_Success() (gas: 282959)
+[FAIL: EvmError: Revert] test_InitiateDispute() (gas: 283576)
+[FAIL: EvmError: Revert] test_InitiateDispute_RevertAlreadyExists() (gas: 283794)
+[FAIL: EvmError: Revert] test_InitiateDispute_RevertDeadlineExpired() (gas: 283254)
+[FAIL: EvmError: Revert] test_InitiateDispute_RevertNotPayer() (gas: 283121)
+[FAIL: EvmError: Revert] test_ResolveDispute_PayerWins() (gas: 283911)
+[FAIL: EvmError: Revert] test_ResolveDispute_ProviderWins() (gas: 283769)
+[FAIL: EvmError: Revert] test_ResolveDispute_RevertInvalidWinner() (gas: 282541)
+[FAIL: EvmError: Revert] test_ResolveDispute_RevertNotArbiter() (gas: 283745)
+[FAIL: EvmError: Revert] test_ResolveDispute_RevertSlashExceedsBond() (gas: 283302)
+[FAIL: EvmError: Revert] test_ResolveDispute_RevertWrongState() (gas: 282661)
+[FAIL: EvmError: Revert] test_RevealIntent() (gas: 283236)
+[FAIL: EvmError: Revert] test_RevealIntent_RevertWrongState() (gas: 283843)
+[FAIL: EvmError: Revert] test_SettleIntent() (gas: 283143)
+[FAIL: EvmError: Revert] test_SettleIntent_RevertDeadlineExpired() (gas: 283188)
+[FAIL: EvmError: Revert] test_SettleIntent_RevertNotProvider() (gas: 283625)
+[FAIL: EvmError: Revert] test_SettleIntent_RevertZeroGain() (gas: 282776)
+
+Encountered a total of 20 failing tests, 130 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 20 failed tests

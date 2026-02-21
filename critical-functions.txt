@@ -1,0 +1,60 @@
+=== createIntent ===
+    function createIntent(bytes32 commitHash)
+        external
+        nonReentrant
+        returns (bytes32 intentId)
+    {
+        // Nonce per payer (monotonic) to avoid timestamp-derived IDs
+        uint64 nonce = ++nonces[msg.sender];
+
+        // Generate deterministic intentId
+        intentId = keccak256(
+            abi.encodePacked(
+                CHAIN_ID,
+                address(this),
+                msg.sender,
+                commitHash,
+                nonce
+            )
+        );
+
+        // Check intent doesn't exist
+        if (intents[intentId].state != IAgentEscrow.IntentState.NONE) {
+            revert IntentAlreadyExists();
+        }
+=== _generateIntentId ===
+    function _generateIntentId(address payer, bytes32 commitHash) 
+        internal 
+        view 
+        returns (bytes32) 
+    {
+        return keccak256(abi.encodePacked(
+            CHAIN_ID,
+            address(this),
+            payer,
+            commitHash
+        ));
+    }
+=== settleIntent ===
+    function settleIntent(bytes32 intentId, uint16 successGain) 
+        external 
+        nonReentrant 
+    {
+        IAgentEscrow.Intent storage intent = intents[intentId];
+        
+        // Validation
+        if (intent.state != IAgentEscrow.IntentState.REVEALED) revert InvalidIntentState();
+        if (msg.sender != intent.provider) revert OnlyProvider();
+
+        if (block.timestamp > intent.revealedAt + SETTLEMENT_DEADLINE) {
+            revert SettlementDeadlineExpired();
+        }
+=== expireIntent ===
+    function expireIntent(bytes32 intentId) external {
+        IAgentEscrow.Intent storage intent = intents[intentId];
+        
+        // Check intent is revealed and past dispute deadline
+        if (intent.state != IAgentEscrow.IntentState.REVEALED) revert InvalidIntentState();
+        if (block.timestamp <= intent.revealedAt + DISPUTE_DEADLINE) {
+            revert DisputeDeadlineNotExpired();
+        }

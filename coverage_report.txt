@@ -1,0 +1,418 @@
+Compiling 55 files with Solc 0.8.23
+Solc 0.8.23 finished in 2.35s
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> test/mocks/MockStakeManager.sol:12:9:
+   |
+12 |         address provider,
+   |         ^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> test/mocks/MockStakeManager.sol:13:9:
+   |
+13 |         address token,
+   |         ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> test/mocks/MockStakeManager.sol:14:9:
+   |
+14 |         uint256 amount,
+   |         ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> test/mocks/MockStakeManager.sol:26:20:
+   |
+26 |     function slash(bytes32 intentId, uint256 amount) external {
+   |                    ^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> test/mocks/MockStakeManager.sol:26:38:
+   |
+26 |     function slash(bytes32 intentId, uint256 amount) external {
+   |                                      ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+ --> test/mocks/MockReputationRegistry.sol:8:28:
+  |
+8 |     function recordSuccess(address payer, address provider, uint16 gain) external {
+  |                            ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+ --> test/mocks/MockReputationRegistry.sol:8:43:
+  |
+8 |     function recordSuccess(address payer, address provider, uint16 gain) external {
+  |                                           ^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+ --> test/mocks/MockReputationRegistry.sol:8:61:
+  |
+8 |     function recordSuccess(address payer, address provider, uint16 gain) external {
+  |                                                             ^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+   --> test/AgentEscrow.t.sol:666:5:
+    |
+666 |     function test_Debug_MaxBondIsSet() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+  --> test/ReputationRegistry.t.sol:31:5:
+   |
+31 |     function test_Constructor() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Analysing contracts...
+Running tests...
+
+Ran 44 tests for test/AgentEscrow.t.sol:AgentEscrowTest
+[PASS] test_CanUseCredit() (gas: 143821)
+[PASS] test_Constructor() (gas: 25175)
+[PASS] test_Constructor_RevertZeroArbiter() (gas: 72266)
+[PASS] test_Constructor_RevertZeroInsurancePool() (gas: 72176)
+[PASS] test_Constructor_RevertZeroReputation() (gas: 72233)
+[PASS] test_Constructor_RevertZeroStakeManager() (gas: 72164)
+[PASS] test_CreateIntent() (gas: 160296)
+[PASS] test_CreateIntent_MultipleIntents() (gas: 220611)
+[PASS] test_Debug_MaxBondIsSet() (gas: 10742)
+[PASS] test_ExpireCredit() (gas: 148083)
+[PASS] test_ExpireCredit_RevertNotExpired() (gas: 140342)
+[PASS] test_ExpireIntent() (gas: 274055)
+[PASS] test_ExpireIntent_RevertDeadlineNotExpired() (gas: 279077)
+[PASS] test_ExpireIntent_RevertWrongState() (gas: 152225)
+[PASS] test_FullLifecycle_Dispute() (gas: 381150)
+[PASS] test_FullLifecycle_Success() (gas: 322638)
+[PASS] test_FullLifecycle_WithCredit() (gas: 416909)
+[PASS] test_GrantCredit() (gas: 141673)
+[PASS] test_GrantCredit_RevertInsufficientReputation() (gas: 44291)
+[PASS] test_GrantCredit_RevertZeroAmount() (gas: 44318)
+[PASS] test_InitiateDispute() (gas: 322543)
+[PASS] test_InitiateDispute_RevertAlreadyExists() (gas: 315884)
+[PASS] test_InitiateDispute_RevertDeadlineExpired() (gas: 286447)
+[PASS] test_InitiateDispute_RevertNotPayer() (gas: 282724)
+[PASS] test_InitiateDispute_RevertWrongState() (gas: 158871)
+[PASS] test_ResolveDispute_PayerWins() (gas: 388793)
+[PASS] test_ResolveDispute_ProviderWins() (gas: 339665)
+[PASS] test_ResolveDispute_RevertInvalidWinner() (gas: 321548)
+[PASS] test_ResolveDispute_RevertNotArbiter() (gas: 315480)
+[PASS] test_ResolveDispute_RevertSlashExceedsBond() (gas: 319765)
+[PASS] test_ResolveDispute_RevertWrongState() (gas: 285783)
+[PASS] test_RevealIntent() (gas: 288605)
+[PASS] test_RevealIntent_RevertBondExceedsAmount() (gas: 160690)
+[PASS] test_RevealIntent_RevertBondExceedsMax() (gas: 160250)
+[PASS] test_RevealIntent_RevertDeadlineExpired() (gas: 159743)
+[PASS] test_RevealIntent_RevertInvalidHash() (gas: 160387)
+[PASS] test_RevealIntent_RevertNotPayer() (gas: 160175)
+[PASS] test_RevealIntent_RevertWrongState() (gas: 284776)
+[PASS] test_RevealIntent_WithCredit() (gas: 372758)
+[PASS] test_SettleIntent() (gas: 331267)
+[PASS] test_SettleIntent_RevertDeadlineExpired() (gas: 284024)
+[PASS] test_SettleIntent_RevertNotProvider() (gas: 282996)
+[PASS] test_SettleIntent_RevertWrongState() (gas: 156398)
+[PASS] test_SettleIntent_RevertZeroGain() (gas: 283433)
+Suite result: ok. 44 passed; 0 failed; 0 skipped; finished in 42.84ms (41.14ms CPU time)
+
+Ran 39 tests for test/InsurancePool.t.sol:InsurancePoolTest
+[PASS] testFuzz_Claim_AgeRampLinear(uint256) (runs: 256, μ: 377563, ~: 380060)
+[PASS] test_AuthorizeClaim() (gas: 148225)
+[PASS] test_AuthorizeClaim_RevertAlreadyAuthorized() (gas: 147510)
+[PASS] test_AuthorizeClaim_RevertExceedsIntentAmount() (gas: 22291)
+[PASS] test_AuthorizeClaim_RevertTokenNotSupported() (gas: 22312)
+[PASS] test_AuthorizeClaim_RevertUnauthorized() (gas: 22204)
+[PASS] test_AuthorizeClaim_RevertZeroAmount() (gas: 22254)
+[PASS] test_Claim_AgeRamp_Full() (gas: 377628)
+[PASS] test_Claim_AgeRamp_Partial() (gas: 567391)
+[PASS] test_Claim_AgeRamp_Zero() (gas: 280688)
+[PASS] test_Claim_BucketSnapshotImmutable() (gas: 508836)
+[PASS] test_Claim_ByClaimId() (gas: 343498)
+[PASS] test_Claim_CapResetsNextEpoch() (gas: 592493)
+[PASS] test_Claim_DayCapEnforced() (gas: 271990)
+[PASS] test_Claim_EpochCapEnforced() (gas: 270635)
+[PASS] test_Claim_InitializesBuckets() (gas: 349830)
+[PASS] test_Claim_PayerEpochCapEnforced() (gas: 278988)
+[PASS] test_Claim_ProviderDayCapEnforced() (gas: 709052)
+[PASS] test_Claim_RevertExpired() (gas: 217269)
+[PASS] test_Claim_RevertInsufficientBalance() (gas: 151825)
+[PASS] test_Claim_RevertNotAuthorized() (gas: 20981)
+[PASS] test_Claim_RevertNotPayer() (gas: 217633)
+[PASS] test_Claim_Success() (gas: 349659)
+[PASS] test_Constructor() (gas: 16084)
+[PASS] test_Constructor_RevertZeroEscrow() (gas: 64886)
+[PASS] test_Constructor_RevertZeroStakeManager() (gas: 64898)
+[PASS] test_Deposit() (gas: 85096)
+[PASS] test_Deposit_Multiple() (gas: 91960)
+[PASS] test_Deposit_RevertZeroAmount() (gas: 19373)
+[PASS] test_Deposit_RevertZeroToken() (gas: 17238)
+[PASS] test_ExpireClaim() (gas: 150492)
+[PASS] test_ExpireClaim_RevertNotAuthorized() (gas: 11332)
+[PASS] test_ExpireClaim_RevertNotExpired() (gas: 143168)
+[PASS] test_FullLifecycle_SingleClaim() (gas: 349782)
+[PASS] test_MultipleClaims_SameDay() (gas: 563241)
+[PASS] test_NotifyDepositFromStake_FromEscrow() (gas: 81214)
+[PASS] test_NotifyDepositFromStake_FromStakeManager() (gas: 77823)
+[PASS] test_NotifyDepositFromStake_RevertUnauthorized() (gas: 12163)
+[PASS] test_NotifyDepositFromStake_RevertZeroAmount() (gas: 14294)
+Suite result: ok. 39 passed; 0 failed; 0 skipped; finished in 187.62ms (204.12ms CPU time)
+
+Ran 37 tests for test/StakeManager.t.sol:StakeManagerTest
+[PASS] testFuzz_AvailableStakeAlwaysCorrect(uint256,uint256) (runs: 256, μ: 185766, ~: 189168)
+[PASS] testFuzz_DepositWithdraw(uint256) (runs: 256, μ: 78059, ~: 77594)
+[PASS] testFuzz_SlashNeverExceedsCap(uint96,uint96) (runs: 256, μ: 209057, ~: 184690)
+[PASS] test_Constructor() (gas: 12570)
+[PASS] test_Constructor_RevertZeroEscrow() (gas: 63007)
+[PASS] test_Constructor_RevertZeroInsurancePool() (gas: 62996)
+[PASS] test_DepositStake() (gas: 90634)
+[PASS] test_DepositStake_Multiple() (gas: 92776)
+[PASS] test_DepositStake_RevertZeroAmount() (gas: 19350)
+[PASS] test_DepositStake_RevertZeroToken() (gas: 17127)
+[PASS] test_FullLifecycle() (gas: 166315)
+[PASS] test_FullLifecycle_WithSlash() (gas: 213283)
+[PASS] test_LockStake() (gas: 194412)
+[PASS] test_LockStake_Multiple() (gas: 260032)
+[PASS] test_LockStake_RevertInsufficientStake() (gas: 91303)
+[PASS] test_LockStake_RevertLockAlreadyExists() (gas: 182598)
+[PASS] test_LockStake_RevertNonEscrow() (gas: 84148)
+[PASS] test_LockStake_RevertZeroAmount() (gas: 19210)
+[PASS] test_LockStake_RevertZeroProvider() (gas: 16997)
+[PASS] test_LockStake_RevertZeroToken() (gas: 17095)
+[PASS] test_MultipleProviders() (gas: 234299)
+[PASS] test_Slash() (gas: 257537)
+[PASS] test_Slash_ExactlyCap() (gas: 242436)
+[PASS] test_Slash_RevertExceedsCap() (gas: 181915)
+[PASS] test_Slash_RevertLockNotActive() (gas: 147552)
+[PASS] test_Slash_RevertLockNotFound() (gas: 16333)
+[PASS] test_Slash_RevertNonEscrow() (gas: 11959)
+[PASS] test_Slash_RevertZeroAmount() (gas: 181200)
+[PASS] test_UnlockStake() (gas: 157496)
+[PASS] test_UnlockStake_Idempotent() (gas: 148723)
+[PASS] test_UnlockStake_NonExistent() (gas: 15453)
+[PASS] test_UnlockStake_RevertNonEscrow() (gas: 11585)
+[PASS] test_WithdrawStake() (gas: 99460)
+[PASS] test_WithdrawStake_Full() (gas: 77274)
+[PASS] test_WithdrawStake_RevertInsufficientStake() (gas: 86876)
+[PASS] test_WithdrawStake_RevertWithLocked() (gas: 185816)
+[PASS] test_WithdrawStake_SuccessWithLocked() (gas: 198864)
+Suite result: ok. 37 passed; 0 failed; 0 skipped; finished in 312.95ms (340.83ms CPU time)
+
+Ran 17 tests for test/ReputationRegistry.t.sol:ReputationRegistryTest
+[PASS] testFuzz_GetCurrentEpoch_AlwaysMultipleOf28Days(uint256) (runs: 256, μ: 10666, ~: 10262)
+[PASS] testFuzz_RecordSuccess_NeverExceedsMax(uint16,uint16) (runs: 256, μ: 68717, ~: 68553)
+[PASS] test_Constructor() (gas: 11448)
+[PASS] test_Constructor_RevertZeroEscrow() (gas: 37310)
+[PASS] test_GetCurrentEpoch() (gas: 17958)
+[PASS] test_RecordSuccess_Accumulates() (gas: 78206)
+[PASS] test_RecordSuccess_Basic() (gas: 75798)
+[PASS] test_RecordSuccess_CounterpartyCapExact() (gas: 70332)
+[PASS] test_RecordSuccess_CounterpartyCapExceeded_Clamped() (gas: 85704)
+[PASS] test_RecordSuccess_CounterpartyCapExhausted() (gas: 83642)
+[PASS] test_RecordSuccess_CounterpartyCapResetsNextEpoch() (gas: 102762)
+[PASS] test_RecordSuccess_MultiplePayers() (gas: 102942)
+[PASS] test_RecordSuccess_RevertNonEscrow() (gas: 14535)
+[PASS] test_RecordSuccess_RevertZeroGain() (gas: 17114)
+[PASS] test_RecordSuccess_RevertZeroPayer() (gas: 14886)
+[PASS] test_RecordSuccess_RevertZeroProvider() (gas: 14919)
+[PASS] test_RecordSuccess_ScoreSaturatesAtMax() (gas: 657357)
+Suite result: ok. 17 passed; 0 failed; 0 skipped; finished in 101.33ms (100.83ms CPU time)
+
+Ran 4 tests for test/invariants/StakeManagerInvariants.t.sol:StakeManagerInvariantsTest
+[PASS] invariant_AccountingConsistent() (runs: 256, calls: 3840, reverts: 0)
+
+╭---------------------+---------------+-------+---------+----------╮
+| Contract            | Selector      | Calls | Reverts | Discards |
++==================================================================+
+| StakeManagerHandler | depositStake  | 803   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | lockStake     | 775   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | slash         | 768   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | unlockStake   | 733   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | withdrawStake | 761   | 0       | 0        |
+╰---------------------+---------------+-------+---------+----------╯
+
+[PASS] invariant_ContractBalanceSufficient() (runs: 256, calls: 3840, reverts: 0)
+
+╭---------------------+---------------+-------+---------+----------╮
+| Contract            | Selector      | Calls | Reverts | Discards |
++==================================================================+
+| StakeManagerHandler | depositStake  | 803   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | lockStake     | 775   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | slash         | 768   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | unlockStake   | 733   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | withdrawStake | 761   | 0       | 0        |
+╰---------------------+---------------+-------+---------+----------╯
+
+[PASS] invariant_LockedNeverExceedsTotal() (runs: 256, calls: 3840, reverts: 0)
+
+╭---------------------+---------------+-------+---------+----------╮
+| Contract            | Selector      | Calls | Reverts | Discards |
++==================================================================+
+| StakeManagerHandler | depositStake  | 803   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | lockStake     | 775   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | slash         | 768   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | unlockStake   | 733   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | withdrawStake | 761   | 0       | 0        |
+╰---------------------+---------------+-------+---------+----------╯
+
+[PASS] invariant_TotalEqualsLockedPlusAvailable() (runs: 256, calls: 3840, reverts: 0)
+
+╭---------------------+---------------+-------+---------+----------╮
+| Contract            | Selector      | Calls | Reverts | Discards |
++==================================================================+
+| StakeManagerHandler | depositStake  | 803   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | lockStake     | 775   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | slash         | 768   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | unlockStake   | 733   | 0       | 0        |
+|---------------------+---------------+-------+---------+----------|
+| StakeManagerHandler | withdrawStake | 761   | 0       | 0        |
+╰---------------------+---------------+-------+---------+----------╯
+
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 7.06s (9.21s CPU time)
+
+Ran 4 tests for test/invariants/InsurancePoolInvariants.t.sol:InsurancePoolInvariantsTest
+[PASS] invariant_AccountingConsistent() (runs: 256, calls: 3840, reverts: 0)
+
+╭----------------------+----------------+-------+---------+----------╮
+| Contract             | Selector       | Calls | Reverts | Discards |
++====================================================================+
+| InsurancePoolHandler | authorizeClaim | 910   | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | deposit        | 956   | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | executeClaim   | 1008  | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | warpTime       | 966   | 0       | 0        |
+╰----------------------+----------------+-------+---------+----------╯
+
+[PASS] invariant_BucketOpeningBalancesImmutable() (runs: 256, calls: 3840, reverts: 0)
+
+╭----------------------+----------------+-------+---------+----------╮
+| Contract             | Selector       | Calls | Reverts | Discards |
++====================================================================+
+| InsurancePoolHandler | authorizeClaim | 910   | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | deposit        | 956   | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | executeClaim   | 1008  | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | warpTime       | 966   | 0       | 0        |
+╰----------------------+----------------+-------+---------+----------╯
+
+[PASS] invariant_ClaimedNeverExceedsRequested() (runs: 256, calls: 3840, reverts: 0)
+
+╭----------------------+----------------+-------+---------+----------╮
+| Contract             | Selector       | Calls | Reverts | Discards |
++====================================================================+
+| InsurancePoolHandler | authorizeClaim | 910   | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | deposit        | 956   | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | executeClaim   | 1008  | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | warpTime       | 966   | 0       | 0        |
+╰----------------------+----------------+-------+---------+----------╯
+
+[PASS] invariant_PoolBalanceSufficient() (runs: 256, calls: 3840, reverts: 0)
+
+╭----------------------+----------------+-------+---------+----------╮
+| Contract             | Selector       | Calls | Reverts | Discards |
++====================================================================+
+| InsurancePoolHandler | authorizeClaim | 910   | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | deposit        | 956   | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | executeClaim   | 1008  | 0       | 0        |
+|----------------------+----------------+-------+---------+----------|
+| InsurancePoolHandler | warpTime       | 966   | 0       | 0        |
+╰----------------------+----------------+-------+---------+----------╯
+
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 6.91s (11.76s CPU time)
+
+Ran 2 tests for test/Counter.t.sol:CounterTest
+[PASS] testFuzz_SetNumber(uint256) (runs: 256, μ: 28667, ~: 29289)
+[PASS] test_Increment() (gas: 28784)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 7.07s (7.07s CPU time)
+
+Ran 3 tests for test/invariants/ReputationInvariants.t.sol:ReputationInvariantsTest
+[PASS] invariant_CounterpartyGainsNeverExceedCap() (runs: 256, calls: 3840, reverts: 0)
+
+╭-------------------+---------------+-------+---------+----------╮
+| Contract          | Selector      | Calls | Reverts | Discards |
++================================================================+
+| ReputationHandler | recordSuccess | 1901  | 0       | 0        |
+|-------------------+---------------+-------+---------+----------|
+| ReputationHandler | warpTime      | 1939  | 0       | 0        |
+╰-------------------+---------------+-------+---------+----------╯
+
+[PASS] invariant_EpochIsMultipleOf28Days() (runs: 256, calls: 3840, reverts: 0)
+
+╭-------------------+---------------+-------+---------+----------╮
+| Contract          | Selector      | Calls | Reverts | Discards |
++================================================================+
+| ReputationHandler | recordSuccess | 1901  | 0       | 0        |
+|-------------------+---------------+-------+---------+----------|
+| ReputationHandler | warpTime      | 1939  | 0       | 0        |
+╰-------------------+---------------+-------+---------+----------╯
+
+[PASS] invariant_ScoreNeverExceedsMax() (runs: 256, calls: 3840, reverts: 0)
+
+╭-------------------+---------------+-------+---------+----------╮
+| Contract          | Selector      | Calls | Reverts | Discards |
++================================================================+
+| ReputationHandler | recordSuccess | 1901  | 0       | 0        |
+|-------------------+---------------+-------+---------+----------|
+| ReputationHandler | warpTime      | 1939  | 0       | 0        |
+╰-------------------+---------------+-------+---------+----------╯
+
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 9.24s (12.92s CPU time)
+
+Ran 8 test suites in 9.24s (30.92s CPU time): 150 tests passed, 0 failed, 0 skipped (150 total tests)
+
+╭-----------------------------------------------+------------------+------------------+------------------+-----------------╮
+| File                                          | % Lines          | % Statements     | % Branches       | % Funcs         |
++==========================================================================================================================+
+| script/Counter.s.sol                          | 0.00% (0/5)      | 0.00% (0/3)      | 100.00% (0/0)    | 0.00% (0/2)     |
+|-----------------------------------------------+------------------+------------------+------------------+-----------------|
+| script/DeployReputationRegistry.s.sol         | 0.00% (0/8)      | 0.00% (0/9)      | 100.00% (0/0)    | 0.00% (0/1)     |
+|-----------------------------------------------+------------------+------------------+------------------+-----------------|
+| script/DeployStakeManager.s.sol               | 0.00% (0/11)     | 0.00% (0/13)     | 100.00% (0/0)    | 0.00% (0/1)     |
+|-----------------------------------------------+------------------+------------------+------------------+-----------------|
+| src/AgentEscrow.sol                           | 95.95% (142/148) | 92.86% (169/182) | 78.26% (36/46)   | 94.44% (17/18)  |
+|-----------------------------------------------+------------------+------------------+------------------+-----------------|
+| src/Counter.sol                               | 100.00% (4/4)    | 100.00% (2/2)    | 100.00% (0/0)    | 100.00% (2/2)   |
+|-----------------------------------------------+------------------+------------------+------------------+-----------------|
+| src/InsurancePool.sol                         | 99.21% (125/126) | 97.26% (142/146) | 81.25% (26/32)   | 100.00% (22/22) |
+|-----------------------------------------------+------------------+------------------+------------------+-----------------|
+| src/ReputationRegistry.sol                    | 100.00% (26/26)  | 100.00% (26/26)  | 100.00% (9/9)    | 100.00% (6/6)   |
+|-----------------------------------------------+------------------+------------------+------------------+-----------------|
+| src/StakeManager.sol                          | 100.00% (68/68)  | 96.20% (76/79)   | 84.21% (16/19)   | 100.00% (11/11) |
+|-----------------------------------------------+------------------+------------------+------------------+-----------------|
+| test/invariants/InsurancePoolInvariants.t.sol | 77.78% (42/54)   | 85.71% (42/49)   | 85.71% (6/7)     | 45.45% (5/11)   |
+|-----------------------------------------------+------------------+------------------+------------------+-----------------|
+| test/invariants/ReputationInvariants.t.sol    | 69.23% (18/26)   | 78.95% (15/19)   | 100.00% (2/2)    | 42.86% (3/7)    |
+|-----------------------------------------------+------------------+------------------+------------------+-----------------|
+| test/invariants/StakeManagerInvariants.t.sol  | 91.84% (45/49)   | 92.31% (48/52)   | 75.00% (6/8)     | 75.00% (6/8)    |
+|-----------------------------------------------+------------------+------------------+------------------+-----------------|
+| test/mocks/MockAgentEscrow.sol                | 40.00% (2/5)     | 33.33% (1/3)     | 0.00% (0/1)      | 50.00% (1/2)    |
+|-----------------------------------------------+------------------+------------------+------------------+-----------------|
+| test/mocks/MockERC20.sol                      | 50.00% (4/8)     | 50.00% (2/4)     | 100.00% (0/0)    | 50.00% (2/4)    |
+|-----------------------------------------------+------------------+------------------+------------------+-----------------|
+| test/mocks/MockInsurancePool.sol              | 72.73% (8/11)    | 71.43% (5/7)     | 100.00% (0/0)    | 75.00% (3/4)    |
+|-----------------------------------------------+------------------+------------------+------------------+-----------------|
+| test/mocks/MockReputationRegistry.sol         | 75.00% (6/8)     | 75.00% (3/4)     | 100.00% (0/0)    | 75.00% (3/4)    |
+|-----------------------------------------------+------------------+------------------+------------------+-----------------|
+| test/mocks/MockStakeManager.sol               | 66.67% (8/12)    | 62.50% (5/8)     | 100.00% (0/0)    | 75.00% (3/4)    |
+|-----------------------------------------------+------------------+------------------+------------------+-----------------|
+| Total                                         | 87.52% (498/569) | 88.45% (536/606) | 81.45% (101/124) | 78.50% (84/107) |
+╰-----------------------------------------------+------------------+------------------+------------------+-----------------╯
