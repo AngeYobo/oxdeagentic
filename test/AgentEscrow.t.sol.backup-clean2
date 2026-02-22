@@ -701,6 +701,35 @@ contract AgentEscrowTest is Test {
         assertEq(escrow.MAX_BOND_PER_TOKEN(address(token)), 1000 ether);
     }
 
+    // ❌ MANQUANT: Tentative de révéler avec token différent
+    function test_Security_RevealDifferentToken() public {
+        // Create with USDC
+        MockERC20 usdc = new MockERC20("USDC", "USDC", 6);
+        vm.prank(arbiter);
+        escrow.setMaxBondPerToken(address(usdc), 1000 ether);
+        
+        bytes32 commitHash = _getCommitHash(provider, address(usdc), 100 ether, 10 ether, testSalt);
+        bytes32 intentId = _createIntent(payer, address(usdc), 100 ether, commitHash);
+        
+        // Try to reveal for token (not usdc) - should revert
+        bytes32 wrongHash = _getCommitHash(provider, address(token), 100 ether, 10 ether, testSalt);
+        vm.prank(payer);
+        vm.expectRevert(IAgentEscrow.InvalidCommitHash.selector);
+        escrow.revealIntent(intentId, provider, 10 ether, testSalt);
+    }
+
+    // ❌ MANQUANT: Tentative de révéler avec amount différent  
+    function test_Security_RevealDifferentAmount() public {
+        // Create with 100 ether
+        bytes32 commitHash = _getCommitHash(provider, address(token), 100 ether, 10 ether, testSalt);
+        bytes32 intentId = _createIntentDefault(commitHash);
+        
+        // Hash calculé avec 200 ether - should revert
+        bytes32 wrongHash = _getCommitHash(provider, address(token), 200 ether, 10 ether, testSalt);
+        vm.prank(payer);
+        vm.expectRevert(IAgentEscrow.InvalidCommitHash.selector);
+        escrow.revealIntent(intentId, provider, 10 ether, testSalt);
+    }
 
     // ❌ MANQUANT: Settlement après révocation allowance (devrait passer)
     function test_Security_SettleAfterAllowanceRevoked() public {
@@ -799,44 +828,39 @@ contract AgentEscrowTest is Test {
         vm.stopPrank();
     }
 
-    // ══════════════════════════════════════════════════════════════════════════════
-    // Security: Immutability Tests
-    // ══════════════════════════════════════════════════════════════════════════════
-    
-    /// @dev Verify token and amount are immutable after creation (custodial model)
-    function test_Security_TokenAmountImmutable() public {
+    function test_Security_TokenImmutableAfterCreate() public {
+        MockERC20 usdc = new MockERC20("USDC", "USDC", 6);
+        
+        vm.prank(arbiter);
+        escrow.setMaxBondPerToken(address(usdc), 1000 ether);
+        escrow.setMaxPayerPayoutPerToken(address(usdc), 100 ether);
+        
         uint96 testAmount = 100 ether;
         uint96 testBond = 10 ether;
         bytes32 testSalt = keccak256("salt");
         
-        bytes32 commitHash = keccak256(abi.encodePacked(
-            provider, address(token), testAmount, testBond, testSalt
+        // Create with USDC
+        bytes32 commitHashUSDC = keccak256(abi.encodePacked(
+            provider, address(usdc), testAmount, testBond, testSalt
         ));
         
         vm.startPrank(payer);
-        deal(address(token), payer, testAmount);
-        token.approve(address(escrow), type(uint256).max);
-        bytes32 intentId = escrow.createIntent(address(token), testAmount, commitHash);
+        deal(address(usdc), payer, testAmount);
+        usdc.approve(address(escrow), type(uint256).max);
+        bytes32 intentId = escrow.createIntent(address(usdc), testAmount, commitHashUSDC);
         
-        // Capture initial values
-        IAgentEscrow.Intent memory intentBefore = escrow.getIntent(intentId);
-        address tokenBefore = intentBefore.token;
-        uint96 amountBefore = intentBefore.amount;
+        // Intent stores USDC
+        IAgentEscrow.Intent memory intent = escrow.getIntent(intentId);
+        assertEq(intent.token, address(usdc));
         
-        // Reveal should NOT modify token or amount
+        // Try to reveal with hash computed for different token (token) - should fail
+        bytes32 commitHashToken = keccak256(abi.encodePacked(
+            provider, address(token), testAmount, testBond, testSalt
+        ));
+        
+        // This will fail because intent.token (usdc) != token in hash
+        vm.expectRevert(IAgentEscrow.InvalidCommitHash.selector);
         escrow.revealIntent(intentId, provider, testBond, testSalt);
-        
-        // Verify token and amount remain unchanged
-        IAgentEscrow.Intent memory intentAfter = escrow.getIntent(intentId);
-        assertEq(intentAfter.token, tokenBefore, "Token should be immutable");
-        assertEq(intentAfter.amount, amountBefore, "Amount should be immutable");
-        
-        // Additional verification: values match creation parameters
-        assertEq(intentAfter.token, address(token), "Token should match creation");
-        assertEq(intentAfter.amount, testAmount, "Amount should match creation");
-        
         vm.stopPrank();
     }
-
-    
 }
