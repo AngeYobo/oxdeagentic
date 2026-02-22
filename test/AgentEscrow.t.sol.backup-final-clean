@@ -700,4 +700,140 @@ contract AgentEscrowTest is Test {
     function test_Debug_MaxBondIsSet() public {
         assertEq(escrow.MAX_BOND_PER_TOKEN(address(token)), 1000 ether);
     }
-}
+
+    // ❌ MANQUANT: Tentative de révéler avec token différent
+    function test_Security_RevealDifferentToken() public {
+        // Create with USDC
+        MockERC20 usdc = new MockERC20("USDC", "USDC", 6);
+        vm.prank(arbiter);
+        escrow.setMaxBondPerToken(address(usdc), 1000 ether);
+        
+        bytes32 commitHash = _getCommitHash(provider, address(usdc), 100 ether, 10 ether, testSalt);
+        bytes32 intentId = _createIntent(payer, address(usdc), 100 ether, commitHash);
+        
+        // Try to reveal for token (not usdc) - should revert
+        bytes32 wrongHash = _getCommitHash(provider, address(token), 100 ether, 10 ether, testSalt);
+        vm.prank(payer);
+        vm.expectRevert(IAgentEscrow.InvalidCommitHash.selector);
+        escrow.revealIntent(intentId, provider, 10 ether, testSalt);
+    }
+
+    // ❌ MANQUANT: Tentative de révéler avec amount différent  
+    function test_Security_RevealDifferentAmount() public {
+        // Create with 100 ether
+        bytes32 commitHash = _getCommitHash(provider, address(token), 100 ether, 10 ether, testSalt);
+        bytes32 intentId = _createIntentDefault(commitHash);
+        
+        // Hash calculé avec 200 ether - should revert
+        bytes32 wrongHash = _getCommitHash(provider, address(token), 200 ether, 10 ether, testSalt);
+        vm.prank(payer);
+        vm.expectRevert(IAgentEscrow.InvalidCommitHash.selector);
+        escrow.revealIntent(intentId, provider, 10 ether, testSalt);
+    }
+
+    // ❌ MANQUANT: Settlement après révocation allowance (devrait passer)
+    function test_Security_SettleAfterAllowanceRevoked() public {
+        bytes32 intentId = _createAndRevealIntent();
+        
+        // Payer révoque son allowance (malveillant ou accident)
+        vm.prank(payer);
+        token.approve(address(escrow), 0);
+        
+        // Settlement devrait ENCORE fonctionner (fonds en custody)
+        vm.prank(provider);
+        escrow.settleIntent(intentId, 10);
+        
+        // Vérifier que provider a reçu les fonds
+        assertEq(token.balanceOf(provider), INITIAL_BALANCE + testAmount);
+    }
+
+    // ❌ MANQUANT: Vérifier qu'unlock est appelé une seule fois
+    function test_Security_ExpireIntentSingleUnlock() public {
+        bytes32 intentId = _createAndRevealIntent();
+        
+        // Warp past dispute deadline
+        vm.warp(block.timestamp + 8 days);
+        
+        // Track unlock calls
+        uint256 unlocksBefore = stakeManager.unlockCallCount();
+        
+        escrow.expireIntent(intentId);
+        
+        uint256 unlocksAfter = stakeManager.unlockCallCount();
+        
+        // Should be called exactly once
+        assertEq(unlocksAfter - unlocksBefore, 1);
+    }
+
+    // ❌ MANQUANT: Vérifier custody à chaque étape
+    function test_Security_CustodialInvariants() public {
+        uint256 payerBefore = token.balanceOf(payer);
+        uint256 escrowBefore = token.balanceOf(address(escrow));
+        
+        // 1. Create: payer débité, escrow crédité
+        bytes32 commitHash = _getCommitHash(provider, address(token), testAmount, testBond, testSalt);
+        bytes32 intentId = _createIntentDefault(commitHash);
+        
+        assertEq(token.balanceOf(payer), payerBefore - testAmount);
+        assertEq(token.balanceOf(address(escrow)), escrowBefore + testAmount);
+        
+        // 2. Reveal: aucun transfert
+        uint256 payerAfterReveal = token.balanceOf(payer);
+        uint256 escrowAfterReveal = token.balanceOf(address(escrow));
+        
+        vm.prank(payer);
+        escrow.revealIntent(intentId, provider, testBond, testSalt);
+        
+        assertEq(token.balanceOf(payer), payerAfterReveal);
+        assertEq(token.balanceOf(address(escrow)), escrowAfterReveal);
+        
+        // 3. Settle: escrow débité, provider crédité
+        vm.prank(provider);
+        escrow.settleIntent(intentId, 10);
+        
+        assertEq(token.balanceOf(address(escrow)), escrowAfterReveal - testAmount);
+        assertEq(token.balanceOf(provider), INITIAL_BALANCE + testAmount);
+    }
+
+    // ❌ MANQUANT: Impossibilité de double settle
+    function test_Security_CannotDoubleSettle() public {
+        bytes32 intentId = _createAndRevealIntent();
+        
+        vm.prank(provider);
+        escrow.settleIntent(intentId, 10);
+        
+        // Try to settle again
+        vm.prank(provider);
+        vm.expectRevert(IAgentEscrow.InvalidIntentState.selector);
+        escrow.settleIntent(intentId, 10);
+    }
+
+
+    function test_Security_ReentrancyProtection() public {
+        // Deploy malicious token
+        // Attempt reentrancy attack
+        // Should revert with ReentrancyGuard error
+    }
+
+    // ❌ MANQUANT: Multiples intents avec tokens différents
+    function test_Security_MultipleTokensIsolation() public {
+        MockERC20 usdc = new MockERC20("USDC", "USDC", 6);
+        MockERC20 dai = new MockERC20("DAI", "DAI", 18);
+        
+        vm.startPrank(arbiter);
+        escrow.setMaxBondPerToken(address(usdc), 1000 ether);
+        escrow.setMaxBondPerToken(address(dai), 1000 ether);
+        vm.stopPrank();
+        
+        // Create 2 intents with different tokens
+        bytes32 id1 = _createIntent(payer, address(usdc), 100e6, hash1);
+        bytes32 id2 = _createIntent(payer, address(dai), 100 ether, hash2);
+        
+        // Verify escrow holds both tokens correctly
+        assertEq(usdc.balanceOf(address(escrow)), 100e6);
+        assertEq(dai.balanceOf(address(escrow)), 100 ether);
+        
+        // Settle both and verify correct tokens transferred
+    }
+}   
+

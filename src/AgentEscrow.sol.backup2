@@ -9,8 +9,6 @@ import {IStakeManager} from "./interfaces/IStakeManager.sol";
 import {IInsurancePool} from "./interfaces/IInsurancePool.sol";
 import {IReputationRegistry} from "./interfaces/IReputationRegistry.sol";
 
-
-
 /**
  * @title AgentEscrow
  * @notice Main orchestrator for decentralized AI agent settlement with commit-reveal intents
@@ -89,10 +87,10 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
     // ══════════════════════════════════════════════════════════════════════════════
 
     /// @notice Intents by intentId
-    mapping(bytes32 => IAgentEscrow.Intent) public intents;
+    mapping(bytes32 => IAgentEscrow.IAgentEscrow.Intent) public intents;
 
     /// @notice Disputes by intentId
-    mapping(bytes32 => IAgentEscrow.Dispute) public disputes;
+    mapping(bytes32 => IAgentEscrow.IAgentEscrow.Dispute) public disputes;
 
     /// @notice FastMode credits by creditId
     mapping(bytes32 => IAgentEscrow.FastCredit) public credits;
@@ -105,14 +103,29 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
 
     /// @notice Maximum payout per token (governance parameter)
     mapping(address => uint256) public MAX_PAYER_PAYOUT_PER_TOKEN;
-
-    mapping(address => uint64) public nonces;
     
     // ══════════════════════════════════════════════════════════════════════════════
     // Errors
     // ══════════════════════════════════════════════════════════════════════════════
     
-    error BadClaimId();
+    error InvalidAddress();
+    error IntentAlreadyExists();
+    error InvalidIntentState();
+    error RevealDeadlineExpired();
+    error InvalidCommitHash();
+    error ZeroAmount();
+    error BondExceedsAmount();
+    error BondExceedsMax();
+    error SettlementDeadlineExpired();
+    error DisputeDeadlineNotExpired();
+    error DisputeDeadlineExpired();
+    error DisputeAlreadyExists();
+    error DisputeNotActive();
+    error InvalidWinner();
+    error SlashExceedsBond();
+    error CreditNotActive();
+    error CreditNotExpired();
+    
     
     // ══════════════════════════════════════════════════════════════════════════════
     // Constructor
@@ -157,31 +170,33 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
     // ══════════════════════════════════════════════════════════════════════════════
     
     /**
-    * @inheritdoc IAgentEscrow
-    */
-    function createIntent(bytes32 commitHash)
-        external
-        nonReentrant
-        returns (bytes32 intentId)
+     * @inheritdoc IAgentEscrow
+     */
+    function createIntent(bytes32 commitHash) 
+        external 
+        nonReentrant 
+        returns (bytes32 intentId) 
     {
-        uint64 nonce = ++nonces[msg.sender];
-
-        intentId = _generateIntentId(msg.sender, commitHash, nonce);
-
+        // Generate intentId
+        intentId = _generateIntentId(msg.sender, commitHash);
+        
+        // Check intent doesn't exist
         if (intents[intentId].state != IAgentEscrow.IntentState.NONE) {
             revert IntentAlreadyExists();
         }
-
+        
+        // Initialize firstSeen for payer (for insurance age ramp)
         if (firstSeen[msg.sender] == 0) {
             firstSeen[msg.sender] = uint64(block.timestamp);
         }
-
+        
+        // Create intent
         intents[intentId] = IAgentEscrow.Intent({
             payer: msg.sender,
-            provider: address(0),
-            token: address(0),
-            amount: 0,
-            bond: 0,
+            provider: address(0), // Set in reveal
+            token: address(0),    // Set in reveal
+            amount: 0,            // Set in reveal
+            bond: 0,              // Set in reveal
             commitHash: commitHash,
             committedAt: uint64(block.timestamp),
             revealedAt: 0,
@@ -189,7 +204,7 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
             state: IAgentEscrow.IntentState.COMMITTED,
             usedCredit: false
         });
-
+        
         emit IntentCreated(intentId, msg.sender, commitHash, uint64(block.timestamp));
     }
     
@@ -228,8 +243,8 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
         if (provider == address(0)) revert InvalidAddress();
         if (token == address(0)) revert InvalidAddress();
         if (amount == 0) revert ZeroAmount();
-        if (bond > MAX_BOND_PER_TOKEN[token]) revert BondExceedsMax();
         if (bond > amount) revert BondExceedsAmount();
+        if (bond > MAX_BOND_PER_TOKEN[token]) revert BondExceedsMax();
         
         // Update intent
         intent.provider = provider;
@@ -258,7 +273,7 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
             emit CreditConsumed(creditId, intent.payer, token, amount, credit.remainingAmount);
         } else {
             // Regular path: lock stake
-            IStakeManager(stakeManager).lockStake(provider, token, bond, intentId);
+            IStakeManager(stakeManager).lockStake(intentId, provider, token, bond);
         }
         
         emit IntentRevealed(
@@ -282,9 +297,8 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
         IAgentEscrow.Intent storage intent = intents[intentId];
         
         // Validation
-        if (intent.state != IAgentEscrow.IntentState.REVEALED) revert InvalidIntentState();
         if (msg.sender != intent.provider) revert OnlyProvider();
-
+        if (intent.state != IAgentEscrow.IntentState.REVEALED) revert InvalidIntentState();
         if (block.timestamp > intent.revealedAt + SETTLEMENT_DEADLINE) {
             revert SettlementDeadlineExpired();
         }
@@ -296,7 +310,7 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
         
         // Unlock stake (if not using credit)
         if (!intent.usedCredit) {
-            IStakeManager(stakeManager).unlockStake(intentId);
+            IStakeManager(stakeManager).unlockStake(intentId, intent.provider);
         }
         
         // Record success in reputation registry
@@ -306,19 +320,12 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
             successGain
         );
         
-        /// @dev Slither: arbitrary-send-erc20 is expected here.
-        ///      Payment is pulled from `intent.payer` (3rd party) by design:
-        ///      - `intent.payer` is set only at createIntent() = msg.sender
-        ///      - commit-reveal binds token/amount/provider under payer control
-        ///      - only revealed provider can settle
-        ///      - payer must approve escrow on token
-
-        // Optional: explicit allowance check (UX/debug)
-        if (IERC20(intent.token).allowance(intent.payer, address(this)) < intent.amount) {
-            revert InsufficientAllowance();
-        }
-        IERC20(intent.token).safeTransferFrom(intent.payer, intent.provider, intent.amount);
-
+        // Transfer payment from payer to provider
+        IERC20(intent.token).safeTransferFrom(
+            intent.payer,
+            intent.provider,
+            intent.amount
+        );
         
         emit IntentSettled(intentId, successGain, uint64(block.timestamp));
     }
@@ -326,7 +333,7 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
     /**
      * @inheritdoc IAgentEscrow
      */
-    function expireIntent(bytes32 intentId) external nonReentrant {
+    function expireIntent(bytes32 intentId) external {
         IAgentEscrow.Intent storage intent = intents[intentId];
         
         // Check intent is revealed and past dispute deadline
@@ -335,18 +342,14 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
             revert DisputeDeadlineNotExpired();
         }
         
-        
         // Update state
         intent.state = IAgentEscrow.IntentState.EXPIRED;
-        intent.settledAt = uint64(block.timestamp); // ou intent.expiredAt si tu as un champ dédié
         
         // Unlock stake (if not using credit)
         if (!intent.usedCredit) {
-            IStakeManager(stakeManager).unlockStake(intentId);
+            IStakeManager(stakeManager).unlockStake(intentId, intent.provider);
         }
         
-        emit IntentExpired(intentId, uint64(block.timestamp));
-        IStakeManager(stakeManager).unlockStake(intentId);
         emit IntentExpired(intentId, uint64(block.timestamp));
     }
     
@@ -363,14 +366,14 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
     {
         IAgentEscrow.Intent storage intent = intents[intentId];
         
-        // Validation - REORDER THESE TWO LINES:
+        // Validation
         if (msg.sender != intent.payer) revert OnlyPayer();
-        if (disputes[intentId].status != IAgentEscrow.DisputeStatus.NONE) {  // ✅ CHECK THIS FIRST
-            revert DisputeAlreadyExists();
-        }
-        if (intent.state != IAgentEscrow.IntentState.REVEALED) revert InvalidIntentState();  // ✅ THEN THIS
+        if (intent.state != IAgentEscrow.IntentState.REVEALED) revert InvalidIntentState();
         if (block.timestamp > intent.revealedAt + DISPUTE_DEADLINE) {
             revert DisputeDeadlineExpired();
+        }
+        if (disputes[intentId].status != IAgentEscrow.DisputeStatus.NONE) {
+            revert DisputeAlreadyExists();
         }
         
         // Create dispute
@@ -417,13 +420,17 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
         
         // Slash and transfer to insurance pool (if provider lost)
         if (winner == intent.payer && slashAmount > 0 && !intent.usedCredit) {
-            IStakeManager(stakeManager).slash(intentId, slashAmount);
+            IStakeManager(stakeManager).slash(
+                intentId,
+                intent.provider,
+                intent.token,
+                slashAmount
+            );
         }
-        
         
         // Authorize insurance claim (if amount > 0)
         if (insuranceAmount > 0) {
-            bytes32 claimId = IInsurancePool(insurancePool).authorizeClaim(
+            IInsurancePool(insurancePool).authorizeClaim(
                 intentId,
                 intent.payer,
                 intent.provider,
@@ -431,15 +438,11 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
                 insuranceAmount,
                 uint128(intent.amount)
             );
-
-            // Optional sanity check (matches InsurancePool._generateClaimId)
-            bytes32 expected = keccak256(abi.encodePacked(block.chainid, insurancePool, intentId));
-            if (claimId != expected) revert BadClaimId();
         }
         
         // Unlock remaining stake (if not using credit)
         if (!intent.usedCredit) {
-            IStakeManager(stakeManager).unlockStake(intentId);
+            IStakeManager(stakeManager).unlockStake(intentId, intent.provider);
         }
         
         emit DisputeResolved(
@@ -581,12 +584,12 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
      */
     function setMaxPayerPayoutPerToken(address token, uint256 maxPayout) external onlyArbiter {
         MAX_PAYER_PAYOUT_PER_TOKEN[token] = maxPayout;
-        // IInsurancePool(insurancePool).setMaxPayerPayoutPerToken(token, maxPayout);
+        IInsurancePool(insurancePool).setMaxPayerPayoutPerToken(token, maxPayout);
     }
     
     // ══════════════════════════════════════════════════════════════════════════════
     // Internal Functions
-        // IInsurancePool(insurancePool).setMaxPayerPayoutPerToken(token, maxPayout);
+    // ══════════════════════════════════════════════════════════════════════════════
     
     /**
      * @notice Generate deterministic intentId
@@ -594,22 +597,19 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
      * @param commitHash Commit hash
      * @return intentId IAgentEscrow.Intent identifier
      */
-    function _generateIntentId(address payer, bytes32 commitHash, uint64 nonce)
-        internal
-        view
-        returns (bytes32)
+    function _generateIntentId(address payer, bytes32 commitHash) 
+        internal 
+        view 
+        returns (bytes32) 
     {
-        return keccak256(
-            abi.encodePacked(
-                CHAIN_ID,
-                address(this),
-                payer,
-                commitHash,
-                nonce
-            )
-        );
+        return keccak256(abi.encodePacked(
+            CHAIN_ID,
+            address(this),
+            payer,
+            commitHash,
+            block.timestamp
+        ));
     }
-
     
     /**
      * @notice Get credit ID for payer+token pair

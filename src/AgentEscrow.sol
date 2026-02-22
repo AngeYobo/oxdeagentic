@@ -160,12 +160,12 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
     * @inheritdoc IAgentEscrow
     */
     function createIntent(
-        address token,      // ✅ REQUIS
-        uint96 amount,      // ✅ REQUIS
+        address token,      //  REQUIS
+        uint96 amount,      //  REQUIS
         bytes32 commitHash
     ) external nonReentrant returns (bytes32 intentId)
     {
-        // ✅ Validation token support
+        //  Validation token support
         if (token == address(0)) revert InvalidAddress();
         if (amount == 0) revert ZeroAmount();
         if (MAX_BOND_PER_TOKEN[token] == 0) revert UnsupportedToken();
@@ -182,14 +182,14 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
             firstSeen[msg.sender] = uint64(block.timestamp);
         }
         
-        // ✅ CUSTODY TRANSFER - CRITIQUE!
+        //  CUSTODY TRANSFER - CRITIQUE!
         IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
         
         intents[intentId] = IAgentEscrow.Intent({
             payer: msg.sender,
             provider: address(0),  // Set on reveal
-            token: token,          // ✅ From parameter
-            amount: amount,        // ✅ From parameter
+            token: token,          //  From parameter
+            amount: amount,        //  From parameter
             bond: 0,               // Set on reveal
             commitHash: commitHash,
             committedAt: uint64(block.timestamp),
@@ -204,13 +204,11 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
     }
         
     /**
-     * @inheritdoc IAgentEscrow
-     */
+    * @inheritdoc IAgentEscrow
+    */
     function revealIntent(
         bytes32 intentId,
         address provider,
-        address token,
-        uint96 amount,
         uint96 bond,
         bytes32 salt
     ) external nonReentrant {
@@ -224,11 +222,11 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
             revert RevealDeadlineExpired();
         }
         
-        // Verify commit hash
+        // Verify commit hash using STORED token/amount (custodial)
         bytes32 computedHash = keccak256(abi.encodePacked(
             provider,
-            token,
-            amount,
+            intent.token,    //  From storage (set at createIntent)
+            intent.amount,   //  From storage (set at createIntent)
             bond,
             salt
         ));
@@ -236,46 +234,42 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
         
         // Validate parameters (INV-2: bond ≤ amount)
         if (provider == address(0)) revert InvalidAddress();
-        if (token == address(0)) revert InvalidAddress();
-        if (amount == 0) revert ZeroAmount();
-        if (bond > MAX_BOND_PER_TOKEN[token]) revert BondExceedsMax();
-        if (bond > amount) revert BondExceedsAmount();
+        if (bond > MAX_BOND_PER_TOKEN[intent.token]) revert BondExceedsMax();
+        if (bond > intent.amount) revert BondExceedsAmount();
         
-        // Update intent
+        // Update intent (NO token/amount modification - custodial model)
         intent.provider = provider;
-        intent.token = token;
-        intent.amount = amount;
         intent.bond = bond;
         intent.revealedAt = uint64(block.timestamp);
         intent.state = IAgentEscrow.IntentState.REVEALED;
         
         // Check if payer can use FastMode credit
-        bytes32 creditId = _getCreditId(intent.payer, token);
+        bytes32 creditId = _getCreditId(intent.payer, intent.token);
         IAgentEscrow.FastCredit storage credit = credits[creditId];
         
         bool usedCredit = false;
         if (credit.status == IAgentEscrow.CreditStatus.ACTIVE && 
-            credit.remainingAmount >= amount &&
+            credit.remainingAmount >= intent.amount &&
             block.timestamp <= credit.expiresAt) {
             // Consume credit (no stake lock needed)
-            credit.remainingAmount -= amount;
+            credit.remainingAmount -= intent.amount;
             if (credit.remainingAmount == 0) {
                 credit.status = IAgentEscrow.CreditStatus.CONSUMED;
             }
             intent.usedCredit = true;
             usedCredit = true;
             
-            emit CreditConsumed(creditId, intent.payer, token, amount, credit.remainingAmount);
+            emit CreditConsumed(creditId, intent.payer, intent.token, intent.amount, credit.remainingAmount);
         } else {
             // Regular path: lock stake
-            IStakeManager(stakeManager).lockStake(provider, token, bond, intentId);
+            IStakeManager(stakeManager).lockStake(provider, intent.token, bond, intentId);
         }
         
         emit IntentRevealed(
             intentId,
             provider,
-            token,
-            amount,
+            intent.token,
+            intent.amount,
             bond,
             usedCredit,
             uint64(block.timestamp)
@@ -283,14 +277,14 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
     }
     
     /**
-     * @inheritdoc IAgentEscrow
-     */
-    function settleIntent(bytes32 intentId, uint16 successGain) 
-        external 
-        nonReentrant 
+    * @inheritdoc IAgentEscrow
+    */
+    function settleIntent(bytes32 intentId, uint16 successGain)
+        external
+        nonReentrant
     {
         IAgentEscrow.Intent storage intent = intents[intentId];
-        
+
         // Validation
         if (intent.state != IAgentEscrow.IntentState.REVEALED) revert InvalidIntentState();
         if (msg.sender != intent.provider) revert OnlyProvider();
@@ -299,39 +293,29 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
             revert SettlementDeadlineExpired();
         }
         if (successGain == 0) revert ZeroAmount();
-        
-        // Update state before external calls (CEI)
+
+        // Effects (CEI)
         intent.state = IAgentEscrow.IntentState.SETTLED;
         intent.settledAt = uint64(block.timestamp);
-        
+
         // Unlock stake (if not using credit)
         if (!intent.usedCredit) {
             IStakeManager(stakeManager).unlockStake(intentId);
         }
-        
+
         // Record success in reputation registry
         IReputationRegistry(reputationRegistry).recordSuccess(
             intent.payer,
             intent.provider,
             successGain
         );
-        
-        /// @dev Slither: arbitrary-send-erc20 is expected here.
-        ///      Payment is pulled from `intent.payer` (3rd party) by design:
-        ///      - `intent.payer` is set only at createIntent() = msg.sender
-        ///      - commit-reveal binds token/amount/provider under payer control
-        ///      - only revealed provider can settle
-        ///      - payer must approve escrow on token
 
-        // Optional: explicit allowance check (UX/debug)
-        if (IERC20(intent.token).allowance(intent.payer, address(this)) < intent.amount) {
-            revert InsufficientAllowance();
-        }
+        // Interaction: custodial payout (escrow holds funds since createIntent)
         IERC20(intent.token).safeTransfer(intent.provider, intent.amount);
 
-        
         emit IntentSettled(intentId, successGain, uint64(block.timestamp));
     }
+
     
     /**
      * @inheritdoc IAgentEscrow
@@ -356,8 +340,6 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
         }
         
         emit IntentExpired(intentId, uint64(block.timestamp));
-        IStakeManager(stakeManager).unlockStake(intentId);
-        emit IntentExpired(intentId, uint64(block.timestamp));
     }
     
     // ══════════════════════════════════════════════════════════════════════════════
@@ -375,10 +357,10 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
         
         // Validation - REORDER THESE TWO LINES:
         if (msg.sender != intent.payer) revert OnlyPayer();
-        if (disputes[intentId].status != IAgentEscrow.DisputeStatus.NONE) {  // ✅ CHECK THIS FIRST
+        if (disputes[intentId].status != IAgentEscrow.DisputeStatus.NONE) {  //  CHECK THIS FIRST
             revert DisputeAlreadyExists();
         }
-        if (intent.state != IAgentEscrow.IntentState.REVEALED) revert InvalidIntentState();  // ✅ THEN THIS
+        if (intent.state != IAgentEscrow.IntentState.REVEALED) revert InvalidIntentState();  //  THEN THIS
         if (block.timestamp > intent.revealedAt + DISPUTE_DEADLINE) {
             revert DisputeDeadlineExpired();
         }

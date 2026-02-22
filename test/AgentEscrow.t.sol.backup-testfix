@@ -108,7 +108,7 @@ contract AgentEscrowTest is Test {
         intentId = _createIntentDefault(commitHash);
         
         vm.prank(payer);
-        escrow.revealIntent(intentId, provider, testBond, testSalt);
+        escrow.revealIntent(intentId, provider, address(token), testAmount, testBond, testSalt);
     }
     
     // ══════════════════════════════════════════════════════════════════════════════
@@ -201,7 +201,7 @@ contract AgentEscrowTest is Test {
         bytes32 intentId = _createIntentDefault(commitHash);
         
         vm.prank(payer);
-        escrow.revealIntent(intentId, provider, testBond, testSalt);
+        escrow.revealIntent(intentId, provider, address(token), testAmount, testBond, testSalt);
         
         IAgentEscrow.Intent memory intent = escrow.getIntent(intentId);
         assertEq(intent.commitHash, commitHash);
@@ -224,7 +224,7 @@ contract AgentEscrowTest is Test {
         
         vm.prank(other);
         vm.expectRevert(IAgentEscrow.OnlyPayer.selector);
-        escrow.revealIntent(intentId, provider, testBond, testSalt);
+        escrow.revealIntent(intentId, provider, address(token), testAmount, testBond, testSalt);
     }
     
     function test_RevealIntent_RevertWrongState() public {
@@ -234,12 +234,12 @@ contract AgentEscrowTest is Test {
         bytes32 intentId = _createIntentDefault(commitHash);
         
         vm.prank(payer);
-        escrow.revealIntent(intentId, provider, testBond, testSalt);
+        escrow.revealIntent(intentId, provider, address(token), testAmount, testBond, testSalt);
         
         // Try to reveal again
         vm.prank(payer);
         vm.expectRevert(IAgentEscrow.InvalidIntentState.selector);
-        escrow.revealIntent(intentId, provider, testBond, testSalt);
+        escrow.revealIntent(intentId, provider, address(token), testAmount, testBond, testSalt);
     }
     
     function test_RevealIntent_RevertDeadlineExpired() public {
@@ -253,7 +253,7 @@ contract AgentEscrowTest is Test {
         
         vm.prank(payer);
         vm.expectRevert(IAgentEscrow.RevealDeadlineExpired.selector);
-        escrow.revealIntent(intentId, provider, testBond, testSalt);
+        escrow.revealIntent(intentId, provider, address(token), testAmount, testBond, testSalt);
     }
     
     function test_RevealIntent_RevertInvalidHash() public {
@@ -262,11 +262,10 @@ contract AgentEscrowTest is Test {
         vm.prank(payer);
         bytes32 intentId = _createIntentDefault(commitHash);
         
-        // Try to reveal with WRONG SALT (hash won't match)
-        bytes32 wrongSalt = keccak256("wrong_salt");
+        // Try to reveal with wrong parameters
         vm.prank(payer);
         vm.expectRevert(IAgentEscrow.InvalidCommitHash.selector);
-        escrow.revealIntent(intentId, provider, testBond, wrongSalt);
+        escrow.revealIntent(intentId, provider, address(token), testAmount + 1, testBond, testSalt);
     }
     
     function test_RevealIntent_RevertBondExceedsAmount() public {
@@ -278,7 +277,7 @@ contract AgentEscrowTest is Test {
         
         vm.prank(payer);
         vm.expectRevert(IAgentEscrow.BondExceedsAmount.selector);
-        escrow.revealIntent(intentId, provider, invalidBond, testSalt);
+        escrow.revealIntent(intentId, provider, address(token), testAmount, invalidBond, testSalt);
     }
     
     function test_RevealIntent_RevertBondExceedsMax() public {
@@ -290,7 +289,7 @@ contract AgentEscrowTest is Test {
         
         vm.prank(payer);
         vm.expectRevert(IAgentEscrow.BondExceedsMax.selector);
-        escrow.revealIntent(intentId, provider, invalidBond, testSalt);
+        escrow.revealIntent(intentId, provider, address(token), testAmount, invalidBond, testSalt);
     }
     
     // ══════════════════════════════════════════════════════════════════════════════
@@ -596,7 +595,7 @@ contract AgentEscrowTest is Test {
         bytes32 intentId = _createIntentDefault(commitHash);
         
         vm.prank(payer);
-        escrow.revealIntent(intentId, provider, testBond, testSalt);
+        escrow.revealIntent(intentId, provider, address(token), testAmount, testBond, testSalt);
         
         IAgentEscrow.Intent memory intent = escrow.getIntent(intentId);
         assertTrue(intent.usedCredit);
@@ -646,7 +645,7 @@ contract AgentEscrowTest is Test {
         
         // 2. Reveal intent
         vm.prank(payer);
-        escrow.revealIntent(intentId, provider, testBond, testSalt);
+        escrow.revealIntent(intentId, provider, address(token), testAmount, testBond, testSalt);
         
         // 3. Settle intent
         vm.prank(provider);
@@ -686,7 +685,7 @@ contract AgentEscrowTest is Test {
         bytes32 intentId = _createIntentDefault(commitHash);
         
         vm.prank(payer);
-        escrow.revealIntent(intentId, provider, testBond, testSalt);
+        escrow.revealIntent(intentId, provider, address(token), testAmount, testBond, testSalt);
         
         // 3. Settle
         vm.prank(provider);
@@ -700,4 +699,6 @@ contract AgentEscrowTest is Test {
     function test_Debug_MaxBondIsSet() public {
         assertEq(escrow.MAX_BOND_PER_TOKEN(address(token)), 1000 ether);
     }
-}
+
+}   
+

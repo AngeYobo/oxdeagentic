@@ -111,6 +111,7 @@ interface IAgentEscrow {
     error InsufficientReputation();
     error CreditNotActive();
     error CreditNotExpired();
+    // error InsufficientAllowance();
     // ══════════════════════════════════════════════════════════════════════════════
     // Functions
     // ══════════════════════════════════════════════════════════════════════════════
@@ -122,12 +123,12 @@ interface IAgentEscrow {
         bytes32 commitHash
     ) external returns (bytes32 intentId);
     
-    
     function revealIntent(
         bytes32 intentId,
         address provider,
         uint96 bond,
         bytes32 salt
+    ) external;
     ) external;
     
     function settleIntent(bytes32 intentId, uint16 successGain) external;

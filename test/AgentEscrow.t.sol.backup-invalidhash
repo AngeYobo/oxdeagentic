@@ -262,11 +262,10 @@ contract AgentEscrowTest is Test {
         vm.prank(payer);
         bytes32 intentId = _createIntentDefault(commitHash);
         
-        // Try to reveal with WRONG SALT (hash won't match)
-        bytes32 wrongSalt = keccak256("wrong_salt");
+        // Try to reveal with wrong parameters
         vm.prank(payer);
         vm.expectRevert(IAgentEscrow.InvalidCommitHash.selector);
-        escrow.revealIntent(intentId, provider, testBond, wrongSalt);
+        escrow.revealIntent(intentId, provider, testBond, testSalt);
     }
     
     function test_RevealIntent_RevertBondExceedsAmount() public {
@@ -700,4 +699,6 @@ contract AgentEscrowTest is Test {
     function test_Debug_MaxBondIsSet() public {
         assertEq(escrow.MAX_BOND_PER_TOKEN(address(token)), 1000 ether);
     }
-}
+
+}   
+
