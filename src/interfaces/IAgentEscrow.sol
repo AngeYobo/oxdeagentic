@@ -17,7 +17,8 @@ interface IAgentEscrow {
         REVEALED,
         SETTLED,
         DISPUTED,
-        EXPIRED
+        EXPIRED,
+        RESOLVED
     }
     
     enum DisputeStatus {
@@ -50,6 +51,7 @@ interface IAgentEscrow {
         uint64 nonce;
         IntentState state;
         bool usedCredit;
+        bool principalPaid;
     }
     
     struct Dispute {
@@ -83,7 +85,8 @@ interface IAgentEscrow {
     event CreditGranted(bytes32 indexed creditId, address indexed payer, address token, uint128 amount, uint64 timestamp);
     event CreditConsumed(bytes32 indexed creditId, address indexed payer, address token, uint128 amountUsed, uint128 remaining);
     event CreditExpired(bytes32 indexed creditId, uint64 timestamp);
-    
+    event IntentResolved(bytes32 indexed intentId, address winner, uint96 amount, uint64 timestamp);
+
     // ══════════════════════════════════════════════════════════════════════════════
     // Errors
     // ══════════════════════════════════════════════════════════════════════════════
@@ -111,6 +114,7 @@ interface IAgentEscrow {
     error InsufficientReputation();
     error CreditNotActive();
     error CreditNotExpired();
+    error PrincipalAlreadyPaid();
     // ══════════════════════════════════════════════════════════════════════════════
     // Functions
     // ══════════════════════════════════════════════════════════════════════════════

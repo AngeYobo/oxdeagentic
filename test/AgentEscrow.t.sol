@@ -838,5 +838,155 @@ contract AgentEscrowTest is Test {
         vm.stopPrank();
     }
 
+    function test_Economic_ExpireIntent_ShouldRefundPayer() public {
+        // Arrange: create + reveal
+        bytes32 intentId = _createAndRevealIntent();
+
+        uint256 payerBefore = token.balanceOf(payer);
+        uint256 escrowBefore = token.balanceOf(address(escrow));
+
+        // Warp past dispute deadline (needed to expire)
+        vm.warp(block.timestamp + 8 days);
+
+        // Act
+        escrow.expireIntent(intentId);
+
+        // Assert: refund principal to payer
+        uint256 payerAfter = token.balanceOf(payer);
+        uint256 escrowAfter = token.balanceOf(address(escrow));
+
+        assertEq(payerAfter, payerBefore + testAmount, "payer should be refunded on EXPIRED");
+        assertEq(escrowAfter, escrowBefore - testAmount, "escrow should decrease by amount on EXPIRED");
+    }
     
+    function test_Economic_DisputePayerWins_ShouldRefundPayer() public {
+        bytes32 intentId = _createAndRevealIntent();
+
+        // Move to DISPUTED
+        vm.prank(payer);
+        escrow.initiateDispute(intentId, "evidence");
+
+        uint256 payerBefore = token.balanceOf(payer);
+        uint256 escrowBefore = token.balanceOf(address(escrow));
+
+        // Resolve: payer wins (slash/insurance can be 0 for pure economic test)
+        vm.prank(arbiter);
+        escrow.resolveDispute(intentId, payer, 0, 0);
+
+        uint256 payerAfter = token.balanceOf(payer);
+        uint256 escrowAfter = token.balanceOf(address(escrow));
+
+        assertEq(payerAfter, payerBefore + testAmount, "payer should be refunded when payer wins dispute");
+        assertEq(escrowAfter, escrowBefore - testAmount, "escrow should decrease by amount when payer wins dispute");
+    }
+
+    function test_Economic_DisputeProviderWins_ShouldPayProvider() public {
+        bytes32 intentId = _createAndRevealIntent();
+
+        vm.prank(payer);
+        escrow.initiateDispute(intentId, "evidence");
+
+        uint256 providerBefore = token.balanceOf(provider);
+        uint256 escrowBefore = token.balanceOf(address(escrow));
+
+        vm.prank(arbiter);
+        escrow.resolveDispute(intentId, provider, 0, 0);
+
+        uint256 providerAfter = token.balanceOf(provider);
+        uint256 escrowAfter = token.balanceOf(address(escrow));
+
+        assertEq(providerAfter, providerBefore + testAmount, "provider should be paid when provider wins dispute");
+        assertEq(escrowAfter, escrowBefore - testAmount, "escrow should decrease by amount when provider wins dispute");
+    }
+
+    function test_Economic_TerminalState_ShouldNotLeaveFundsInEscrow() public {
+        bytes32 intentId = _createAndRevealIntent();
+
+        // Case: expire path
+        vm.warp(block.timestamp + 8 days);
+        escrow.expireIntent(intentId);
+
+        // At this point, escrow should NOT still hold amount attributable to this intent.
+        // Simplest check: escrow balance should be 0 if this test only created one intent.
+        assertEq(token.balanceOf(address(escrow)), 0, "escrow should not retain funds after EXPIRED");
+    }
+
+    function test_Economic_ExpireIntent_CannotDoubleRefund() public {
+        bytes32 intentId = _createAndRevealIntent();
+
+        vm.warp(block.timestamp + 8 days);
+        escrow.expireIntent(intentId);
+
+        // Second call should revert due to state != REVEALED
+        vm.expectRevert(IAgentEscrow.InvalidIntentState.selector);
+        escrow.expireIntent(intentId);
+    }
+
+    function test_Economic_ResolveDispute_CannotDoublePayout() public {
+        bytes32 intentId = _createAndRevealIntent();
+
+        vm.prank(payer);
+        escrow.initiateDispute(intentId, "evidence");
+
+        vm.prank(arbiter);
+        escrow.resolveDispute(intentId, payer, 0, 0);
+
+        // Second resolve should revert:
+        // - intent no longer DISPUTED (now RESOLVED)
+        vm.prank(arbiter);
+        vm.expectRevert(IAgentEscrow.InvalidIntentState.selector);
+        escrow.resolveDispute(intentId, payer, 0, 0);
+    }
+
+    function test_Economic_ResolvedDispute_CannotExpire() public {
+        bytes32 intentId = _createAndRevealIntent();
+
+        vm.prank(payer);
+        escrow.initiateDispute(intentId, "evidence");
+
+        vm.prank(arbiter);
+        escrow.resolveDispute(intentId, payer, 0, 0);
+
+        vm.warp(block.timestamp + 8 days);
+        vm.expectRevert(IAgentEscrow.InvalidIntentState.selector);
+        escrow.expireIntent(intentId);
+    }
+
+    function test_Economic_ExpireIntent_EscrowDecreasesByAmount() public {
+        bytes32 intentId = _createAndRevealIntent();
+
+        uint256 escrowBefore = token.balanceOf(address(escrow));
+        vm.warp(block.timestamp + 8 days);
+        escrow.expireIntent(intentId);
+        uint256 escrowAfter = token.balanceOf(address(escrow));
+
+        assertEq(escrowAfter, escrowBefore - testAmount);
+    }
+
+    function test_Economic_PrincipalPaid_SafetyNet() public {
+        bytes32 intentId = _createAndRevealIntent();
+
+        vm.prank(provider);
+        escrow.settleIntent(intentId, 10);
+
+        vm.warp(block.timestamp + 8 days);
+
+        // Un intent SETTLED ne peut pas expirer
+        vm.expectRevert(IAgentEscrow.InvalidIntentState.selector);
+        escrow.expireIntent(intentId);
+    }
+
+
+    function test_Economic_SettleIntent_PrincipalAlreadyPaid() public {
+        bytes32 intentId = _createAndRevealIntent();
+
+        vm.prank(provider);
+        escrow.settleIntent(intentId, 10);
+
+        vm.prank(provider);
+        vm.expectRevert(IAgentEscrow.InvalidIntentState.selector);
+        escrow.settleIntent(intentId, 10);
+    }
+
+
 }

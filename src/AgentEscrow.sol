@@ -197,11 +197,23 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
             settledAt: 0,
             nonce: nonce,
             state: IAgentEscrow.IntentState.COMMITTED,
-            usedCredit: false
+            usedCredit: false,
+            principalPaid: false
         });
         
         emit IntentCreated(intentId, msg.sender, commitHash, uint64(block.timestamp));
     }
+
+    function _payPrincipal(IAgentEscrow.Intent storage intent, address to) internal {
+        if (intent.principalPaid) revert PrincipalAlreadyPaid();
+
+        // Effects
+        intent.principalPaid = true;
+
+        // Interaction
+        IERC20(intent.token).safeTransfer(to, intent.amount);
+    }
+
         
     /**
     * @inheritdoc IAgentEscrow
@@ -297,6 +309,7 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
         // Effects (CEI)
         intent.state = IAgentEscrow.IntentState.SETTLED;
         intent.settledAt = uint64(block.timestamp);
+        _payPrincipal(intent, intent.provider);
 
         // Unlock stake (if not using credit)
         if (!intent.usedCredit) {
@@ -310,8 +323,7 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
             successGain
         );
 
-        // Interaction: custodial payout (escrow holds funds since createIntent)
-        IERC20(intent.token).safeTransfer(intent.provider, intent.amount);
+        
 
         emit IntentSettled(intentId, successGain, uint64(block.timestamp));
     }
@@ -322,25 +334,25 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
      */
     function expireIntent(bytes32 intentId) external nonReentrant {
         IAgentEscrow.Intent storage intent = intents[intentId];
-        
-        // Check intent is revealed and past dispute deadline
+
         if (intent.state != IAgentEscrow.IntentState.REVEALED) revert InvalidIntentState();
-        if (block.timestamp <= intent.revealedAt + DISPUTE_DEADLINE) {
-            revert DisputeDeadlineNotExpired();
-        }
-        
-        
-        // Update state
+        if (block.timestamp <= intent.revealedAt + DISPUTE_DEADLINE) revert DisputeDeadlineNotExpired();
+
+        // Effects
         intent.state = IAgentEscrow.IntentState.EXPIRED;
-        intent.settledAt = uint64(block.timestamp); // ou intent.expiredAt si tu as un champ dédié
-        
+        intent.settledAt = uint64(block.timestamp);
+        _payPrincipal(intent, intent.payer);
+
         // Unlock stake (if not using credit)
         if (!intent.usedCredit) {
             IStakeManager(stakeManager).unlockStake(intentId);
         }
-        
+
+
+
         emit IntentExpired(intentId, uint64(block.timestamp));
     }
+
     
     // ══════════════════════════════════════════════════════════════════════════════
     // IAgentEscrow.Dispute Functions
@@ -391,29 +403,25 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
     ) external onlyArbiter nonReentrant {
         IAgentEscrow.Intent storage intent = intents[intentId];
         IAgentEscrow.Dispute storage dispute = disputes[intentId];
-        
-        // Validation
+
         if (intent.state != IAgentEscrow.IntentState.DISPUTED) revert InvalidIntentState();
         if (dispute.status != IAgentEscrow.DisputeStatus.ACTIVE) revert DisputeNotActive();
-        if (winner != intent.payer && winner != intent.provider) {
-            revert InvalidWinner();
-        }
+        if (winner != intent.payer && winner != intent.provider) revert InvalidWinner();
         if (slashAmount > intent.bond) revert SlashExceedsBond();
         if (insuranceAmount > intent.amount) revert InvalidAmount();
-        
-        // Update dispute
+
+        // Effects
         dispute.status = IAgentEscrow.DisputeStatus.RESOLVED;
         dispute.winner = winner;
         dispute.slashAmount = slashAmount;
         dispute.resolvedAt = uint64(block.timestamp);
-        
-        // Slash and transfer to insurance pool (if provider lost)
+
+        // Slash (only if provider lost AND stake path used)
         if (winner == intent.payer && slashAmount > 0 && !intent.usedCredit) {
             IStakeManager(stakeManager).slash(intentId, slashAmount);
         }
-        
-        
-        // Authorize insurance claim (if amount > 0)
+
+        // Insurance authorization (kept as-is)
         if (insuranceAmount > 0) {
             bytes32 claimId = IInsurancePool(insurancePool).authorizeClaim(
                 intentId,
@@ -423,25 +431,26 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
                 insuranceAmount,
                 uint128(intent.amount)
             );
-
-            // Optional sanity check (matches InsurancePool._generateClaimId)
             bytes32 expected = keccak256(abi.encodePacked(block.chainid, insurancePool, intentId));
             if (claimId != expected) revert BadClaimId();
         }
-        
-        // Unlock remaining stake (if not using credit)
+
+        // Unlock remaining stake
         if (!intent.usedCredit) {
             IStakeManager(stakeManager).unlockStake(intentId);
         }
-        
-        emit DisputeResolved(
-            intentId,
-            winner,
-            slashAmount,
-            insuranceAmount,
-            uint64(block.timestamp)
-        );
+
+        // NEW: terminalize intent
+        intent.state = IAgentEscrow.IntentState.RESOLVED;
+        intent.settledAt = uint64(block.timestamp);
+        _payPrincipal(intent, winner);
+
+    
+
+        emit DisputeResolved(intentId, winner, slashAmount, insuranceAmount, uint64(block.timestamp));
+        emit IntentResolved(intentId, winner, intent.amount, uint64(block.timestamp));
     }
+
     
     // ══════════════════════════════════════════════════════════════════════════════
     // FastMode Credit Functions
