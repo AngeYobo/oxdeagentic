@@ -9,18 +9,18 @@ contract DeployStakeManager is Script {
     function run() external returns (StakeManager) {
         address escrow = vm.envAddress("ESCROW_ADDRESS");
         address insurancePool = vm.envAddress("INSURANCE_POOL_ADDRESS");
-        
+
         vm.startBroadcast();
-        
+
         StakeManager stakeManager = new StakeManager(escrow, insurancePool);
-        
+
         vm.stopBroadcast();
-        
+
         console2.log("StakeManager deployed at:", address(stakeManager));
         console2.log("Escrow:", escrow);
         console2.log("InsurancePool:", insurancePool);
         console2.log("MAX_SLASH_BPS:", stakeManager.MAX_SLASH_BPS());
-        
+
         return stakeManager;
     }
 }

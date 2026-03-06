@@ -11,14 +11,10 @@ contract MockInsurancePool {
         notifiedAmount += amount;
     }
 
-    function authorizeClaim(
-        bytes32 intentId,
-        address,
-        address,
-        address,
-        uint128,
-        uint128
-    ) external returns (bytes32 claimId) {
+    function authorizeClaim(bytes32 intentId, address, address, address, uint128, uint128)
+        external
+        returns (bytes32 claimId)
+    {
         wasAuthorizeCalled_ = true;
 
         claimId = keccak256(abi.encodePacked(block.chainid, address(this), intentId));

@@ -6,11 +6,10 @@ pragma solidity ^0.8.23;
  * @notice Simplified escrow for commit-reveal intents with disputes and FastMode
  */
 interface IAgentEscrow {
-    
     // ══════════════════════════════════════════════════════════════════════════════
     // Enums
     // ══════════════════════════════════════════════════════════════════════════════
-    
+
     enum IntentState {
         NONE,
         COMMITTED,
@@ -20,24 +19,24 @@ interface IAgentEscrow {
         EXPIRED,
         RESOLVED
     }
-    
+
     enum DisputeStatus {
         NONE,
         ACTIVE,
         RESOLVED
     }
-    
+
     enum CreditStatus {
         NONE,
         ACTIVE,
         CONSUMED,
         EXPIRED
     }
-    
+
     // ══════════════════════════════════════════════════════════════════════════════
     // Structs
     // ══════════════════════════════════════════════════════════════════════════════
-    
+
     struct Intent {
         address payer;
         address provider;
@@ -53,7 +52,7 @@ interface IAgentEscrow {
         bool usedCredit;
         bool principalPaid;
     }
-    
+
     struct Dispute {
         uint64 initiatedAt;
         uint64 resolvedAt;
@@ -61,7 +60,7 @@ interface IAgentEscrow {
         address winner;
         uint96 slashAmount;
     }
-    
+
     struct FastCredit {
         address payer;
         address token;
@@ -71,26 +70,40 @@ interface IAgentEscrow {
         uint64 expiresAt;
         CreditStatus status;
     }
-    
+
     // ══════════════════════════════════════════════════════════════════════════════
     // Events
     // ══════════════════════════════════════════════════════════════════════════════
-    
+
     event IntentCreated(bytes32 indexed intentId, address indexed payer, bytes32 commitHash, uint64 timestamp);
-    event IntentRevealed(bytes32 indexed intentId, address provider, address token, uint96 amount, uint96 bond, bool usedCredit, uint64 timestamp);
+    event IntentRevealed(
+        bytes32 indexed intentId,
+        address provider,
+        address token,
+        uint96 amount,
+        uint96 bond,
+        bool usedCredit,
+        uint64 timestamp
+    );
     event IntentSettled(bytes32 indexed intentId, uint16 successGain, uint64 timestamp);
     event IntentExpired(bytes32 indexed intentId, uint64 timestamp);
     event DisputeInitiated(bytes32 indexed intentId, address indexed payer, string evidence, uint64 timestamp);
-    event DisputeResolved(bytes32 indexed intentId, address winner, uint96 slashAmount, uint128 insuranceAmount, uint64 timestamp);
-    event CreditGranted(bytes32 indexed creditId, address indexed payer, address token, uint128 amount, uint64 timestamp);
-    event CreditConsumed(bytes32 indexed creditId, address indexed payer, address token, uint128 amountUsed, uint128 remaining);
+    event DisputeResolved(
+        bytes32 indexed intentId, address winner, uint96 slashAmount, uint128 insuranceAmount, uint64 timestamp
+    );
+    event CreditGranted(
+        bytes32 indexed creditId, address indexed payer, address token, uint128 amount, uint64 timestamp
+    );
+    event CreditConsumed(
+        bytes32 indexed creditId, address indexed payer, address token, uint128 amountUsed, uint128 remaining
+    );
     event CreditExpired(bytes32 indexed creditId, uint64 timestamp);
     event IntentResolved(bytes32 indexed intentId, address winner, uint96 amount, uint64 timestamp);
 
     // ══════════════════════════════════════════════════════════════════════════════
     // Errors
     // ══════════════════════════════════════════════════════════════════════════════
-    
+
     error InvalidAddress();
     error UnsupportedToken();
     error OnlyArbiter();
@@ -118,48 +131,33 @@ interface IAgentEscrow {
     // ══════════════════════════════════════════════════════════════════════════════
     // Functions
     // ══════════════════════════════════════════════════════════════════════════════
-    
+
     // Custodial Phase 0
-    function createIntent(
-        address token,
-        uint96 amount,
-        bytes32 commitHash
-    ) external returns (bytes32 intentId);
-    
-    
-    function revealIntent(
-        bytes32 intentId,
-        address provider,
-        uint96 bond,
-        bytes32 salt
-    ) external;
-    
+    function createIntent(address token, uint96 amount, bytes32 commitHash) external returns (bytes32 intentId);
+
+    function revealIntent(bytes32 intentId, address provider, uint96 bond, bytes32 salt) external;
+
     function settleIntent(bytes32 intentId, uint16 successGain) external;
-    
+
     function expireIntent(bytes32 intentId) external;
-    
+
     function initiateDispute(bytes32 intentId, string calldata evidence) external;
-    
-    function resolveDispute(
-        bytes32 intentId,
-        address winner,
-        uint96 slashAmount,
-        uint128 insuranceAmount
-    ) external;
-    
+
+    function resolveDispute(bytes32 intentId, address winner, uint96 slashAmount, uint128 insuranceAmount) external;
+
     function grantCredit(address payer, address token, uint128 amount) external returns (bytes32 creditId);
-    
+
     function expireCredit(bytes32 creditId) external;
-    
+
     // ══════════════════════════════════════════════════════════════════════════════
     // View Functions
     // ══════════════════════════════════════════════════════════════════════════════
-    
+
     function getIntent(bytes32 intentId) external view returns (Intent memory);
     function getDispute(bytes32 intentId) external view returns (Dispute memory);
     function getCredit(bytes32 creditId) external view returns (FastCredit memory);
     function canUseCredit(address payer, address token, uint256 amount) external view returns (bool);
-    
+
     function stakeManager() external view returns (address);
     function insurancePool() external view returns (address);
     function reputationRegistry() external view returns (address);
@@ -167,7 +165,7 @@ interface IAgentEscrow {
     function firstSeen(address payer) external view returns (uint64);
     function MAX_BOND_PER_TOKEN(address token) external view returns (uint256);
     function MAX_PAYER_PAYOUT_PER_TOKEN(address token) external view returns (uint256);
-    
+
     function REVEAL_DEADLINE() external view returns (uint256);
     function SETTLEMENT_DEADLINE() external view returns (uint256);
     function DISPUTE_DEADLINE() external view returns (uint256);
