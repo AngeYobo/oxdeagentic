@@ -235,16 +235,17 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
         }
 
         // Verify commit hash using STORED token/amount (custodial)
-        // forge-lint: disable-next-line(asm-keccak256)
-        bytes32 computedHash = keccak256(
-            abi.encodePacked(
-                provider,
-                intent.token, //  From storage (set at createIntent)
-                intent.amount, //  From storage (set at createIntent)
-                bond,
-                salt
-            )
+        bytes memory packed = abi.encodePacked(
+            provider,
+            intent.token, //  From storage (set at createIntent)
+            intent.amount, //  From storage (set at createIntent)
+            bond,
+            salt
         );
+        bytes32 computedHash;
+        assembly {
+            computedHash := keccak256(add(packed, 32), mload(packed))
+        }
         if (computedHash != intent.commitHash) revert InvalidCommitHash();
 
         // Validate parameters (INV-2: bond ≤ amount)
