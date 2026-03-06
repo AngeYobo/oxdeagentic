@@ -170,8 +170,8 @@ contract ReputationRegistryTest is Test {
 
         // Build up to near max with multiple payers (skip address(0))
         // start from 1 not 0
-        for (uint160 i = 1; i <= 20; i++) {
-            registry.recordSuccess(provider, address(i), 50);
+        for (uint256 i = 1; i <= 20; i++) {
+            registry.recordSuccess(provider, address(uint160(i)), 50);
         }
         // Score should be exactly 1000 (20 * 50)
         assertEq(registry.getScore(provider), 1000);
