@@ -7,3 +7,6 @@
 [submodule "lib/slither-action"]
 	path = lib/slither-action
 	url = https://github.com/crytic/slither-action
+[submodule "deagentic-sdk"]
+	path = deagentic-sdk
+	url = https://github.com/AngeYobo/deagentic-sdk
