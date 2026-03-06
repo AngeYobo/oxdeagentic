@@ -1,106 +1,169 @@
-## Foundry
+# OxDeAgentic
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+**On-chain agentic task market with pre-execution economic containment.**
 
-Foundry consists of:
+OxDeAgentic is a Solidity protocol for autonomous agent task execution. Agents propose work, budgets are enforced before execution, and every settlement is verifiable on-chain. Economic boundaries are enforced by the [OxDeAI protocol](https://github.com/AngeYobo/oxdeai-core) before any tool or contract call runs.
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+---
 
-## Documentation
+## Architecture
 
-https://book.getfoundry.sh/
+```
+┌─────────────────────────────────────────────────────────┐
+│  Agent                                                  │
+│    ↓  proposes task + intent                            │
+│  OxDeAI PDP  ─── evaluatePure(intent, state)            │
+│    ├─ DENY   → task rejected, no contract call          │
+│    └─ ALLOW  → Authorization issued                     │
+│         ↓                                               │
+│  TaskMarket (Solidity)                                  │
+│    ↓  escrow locked                                     │
+│    ↓  task executed                                     │
+│    ↓  settlement verified                               │
+│  Custodial Model  ─── funds released to provider        │
+└─────────────────────────────────────────────────────────┘
+```
 
-## Usage
+**Custodial Model (Phase 0):** Client funds are held in escrow. The protocol enforces budget limits, velocity controls, and replay protection before any settlement executes.
+
+---
+
+## Repository Structure
+
+```
+src/                    — Solidity contracts
+  TaskMarket.sol        — core task lifecycle (post, accept, complete, dispute)
+  Escrow.sol            — custodial fund management
+  interfaces/           — contract interfaces
+test/                   — Foundry test suite (150 tests)
+script/                 — deployment and migration scripts
+migration-custodial/    — Phase 0 custodial migration artifacts
+ai-task-market/         — task market modules
+deagentic-sdk/          — TypeScript SDK (submodule → @oxdeai/sdk)
+docs/                   — protocol documentation
+lib/                    — Foundry dependencies
+```
+
+---
+
+## Prerequisites
+
+- [Foundry](https://book.getfoundry.sh/getting-started/installation) `^0.2`
+- Node.js `>=18`
+- pnpm `>=9`
+
+---
+
+## Getting Started
+
+```bash
+git clone --recurse-submodules https://github.com/AngeYobo/oxdeagentic
+cd oxdeagentic
+
+# Install Foundry dependencies
+forge install
+
+# Install SDK dependencies
+cd deagentic-sdk && pnpm install && cd ..
+```
 
 ### Build
 
-```shell
-$ forge build
+```bash
+forge build
 ```
 
 ### Test
 
-```shell
-$ forge test
+```bash
+forge test
 ```
 
-### Format
-
-```shell
-$ forge fmt
+```
+Ran 150 tests — all passing ✔
 ```
 
-### Gas Snapshots
+### Coverage
 
-```shell
-$ forge snapshot
+```bash
+forge coverage
 ```
 
-### Anvil
+---
 
-```shell
-$ anvil
+## Phase 0 — Custodial Model
+
+The current deployment uses a custodial escrow model:
+
+1. **Client** posts a task with a budget and locks funds in escrow
+2. **Agent** accepts the task — OxDeAI evaluates the intent against policy before the contract call
+3. **Execution** — tool runs only after Authorization is confirmed
+4. **Settlement** — provider receives payment on verified completion
+5. **Dispute** — unresolved tasks trigger escrow refund after timeout
+
+Every settlement produces a hash-chained audit trail verifiable offline via `@oxdeai/conformance`.
+
+---
+
+## OxDeAI Integration
+
+Economic boundaries are enforced by `@oxdeai/core` before any on-chain call:
+
+```typescript
+import { OxDeAIClient } from "@oxdeai/sdk";
+
+const client = new OxDeAIClient({ policyId, agentId });
+const { decision, authorization } = await client.evaluate(intent, state);
+
+if (decision === "ALLOW" && authorization) {
+  await taskMarket.acceptTask(taskId, authorization.id);
+}
+// DENY → no contract call, no gas spent
 ```
 
-### Deploy
+See [`deagentic-sdk/examples/createIntent.ts`](./deagentic-sdk/examples/createIntent.ts) for a full example.
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+---
+
+## npm Packages
+
+| Package | Version | Description |
+|---|---|---|
+| [`@oxdeai/core`](https://www.npmjs.com/package/@oxdeai/core) | `1.0.3` | Policy engine, canonical snapshots, audit chaining |
+| [`@oxdeai/sdk`](https://www.npmjs.com/package/@oxdeai/sdk) | `1.0.3` | TypeScript client wrapper |
+| [`@oxdeai/conformance`](https://www.npmjs.com/package/@oxdeai/conformance) | `1.0.3` | Frozen test vectors + conformance runner |
+
+---
+
+## Deployment
+
+```bash
+# Local devnet
+forge script script/Deploy.s.sol --rpc-url http://localhost:8545 --broadcast
+
+# Testnet
+forge script script/Deploy.s.sol --rpc-url $RPC_URL --broadcast --verify
 ```
 
-### Cast
+---
 
-```shell
-$ cast <subcommand>
-```
+## CI
 
-### Help
+GitHub Actions runs on every push:
 
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+- `forge build` — contract compilation
+- `forge test` — 150 unit and integration tests
+- `@oxdeai/conformance validate` — 40/40 protocol conformance assertions
 
-# Unit Tests
-forge test --match-contract ReputationRegistry -vv
+---
 
-# Unit Tests
-forge test --match-contract ReputationInvariants --ffi
+## License
 
-# Unit tests
-forge test --match-contract StakeManagerTest -vv
+Apache-2.0 — see [LICENSE](./LICENSE)
 
-# Invariant tests
-forge test --match-contract StakeManagerInvariants
+---
 
-# Gas report
-forge test --match-contract StakeManagerTest --gas-report
+## Related
 
-# Should now compile and run
-forge test --match-contract ReputationRegistry -vv
-
-# Run invariant tests
-forge test --match-contract ReputationInvariants -vv
-
-# Run all reputation tests
-forge test --match-path test/ReputationRegistry.t.sol -vv
-forge test --match-path test/invariants/ReputationInvariants.t.sol -vv
-
-# Build
-forge build
-
-# Run all InsurancePool tests
-forge test --match-contract InsurancePoolTest -vv
-
-# Run invariant tests
-forge test --match-contract InsurancePoolInvariantsTest -vv
-
-# Run all tests
-forge test -vv
-
-# Gas report
-forge test --match-contract InsurancePoolTest --gas-report
+- [oxdeai-core](https://github.com/AngeYobo/oxdeai-core) — OxDeAI protocol reference implementation
+- [OxDeAI Protocol Specification v1.0](https://github.com/AngeYobo/oxdeai-core/tree/main/packages/core)
