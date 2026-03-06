@@ -55,7 +55,7 @@ contract ReputationRegistry is IReputationRegistry {
      * @param _escrow AgentEscrow contract address (immutable)
      */
     constructor(address _escrow) {
-        require(_escrow != address(0), "zero ESCROW");
+        require(_escrow != address(0), "zero escrow");
         ESCROW = _escrow;
     }
 
