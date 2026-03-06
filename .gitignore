@@ -26,6 +26,9 @@ slither-*.md
 *.backup*
 *.bak
 
+# Node
+node_modules/
+
 # Archives
 archive/.vscode/
 archive/
