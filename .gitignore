@@ -27,4 +27,4 @@ slither-*.md
 *.bak
 
 # Archives
-archive/
+archive/.vscode/
