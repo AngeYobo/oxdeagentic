@@ -169,7 +169,7 @@ contract ReputationRegistryTest is Test {
         vm.startPrank(escrow);
 
         // Build up to near max with multiple payers (skip address(0))
-        for (uint160 i = 1; // Changed: start from 1, not 0 i <= 20; i++) {
+        for (uint160 i = 1; i <= 20; i++) // start from 1, not 0 {
             registry.recordSuccess(provider, address(i), 50);
         }
         // Score should be exactly 1000 (20 * 50)
