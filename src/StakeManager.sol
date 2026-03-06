@@ -85,8 +85,12 @@ contract StakeManager is IStakeManager, ReentrancyGuard {
     // ══════════════════════════════════════════════════════════════════════════════
 
     modifier onlyEscrow() {
-        if (msg.sender != escrow) revert OnlyEscrow();
+        _onlyEscrow();
         _;
+    }
+
+    function _onlyEscrow() internal view {
+        if (msg.sender != escrow) revert OnlyEscrow();
     }
 
     // ══════════════════════════════════════════════════════════════════════════════
@@ -162,6 +166,7 @@ contract StakeManager is IStakeManager, ReentrancyGuard {
         _intentLocks[intentId] = StakeLock({
             provider: provider,
             token: token,
+            // forge-lint: disable-next-line(unsafe-typecast)
             amount: uint96(amount), // Safe: checked in escrow
             active: true
         });
@@ -218,6 +223,7 @@ contract StakeManager is IStakeManager, ReentrancyGuard {
         // Update accounting before transfers (CEI)
         _totalStake[provider][token] -= amount;
         _lockedStake[provider][token] -= amount;
+        // forge-lint: disable-next-line(unsafe-typecast)
         lock.amount -= uint96(amount); // Safe: amount <= lock.amount by cap check
 
         // Transfer slashed tokens to InsurancePool

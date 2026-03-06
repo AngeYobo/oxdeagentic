@@ -64,8 +64,12 @@ contract ReputationRegistry is IReputationRegistry {
     // ══════════════════════════════════════════════════════════════════════════════
 
     modifier onlyEscrow() {
-        if (msg.sender != escrow) revert OnlyEscrow();
+        _onlyEscrow();
         _;
+    }
+
+    function _onlyEscrow() internal view {
+        if (msg.sender != escrow) revert OnlyEscrow();
     }
 
     // ══════════════════════════════════════════════════════════════════════════════
@@ -137,6 +141,7 @@ contract ReputationRegistry is IReputationRegistry {
      * @inheritdoc IReputationRegistry
      */
     function getCurrentEpoch() public view returns (uint256) {
+        // forge-lint: disable-next-line(divide-before-multiply)
         return (block.timestamp / EPOCH_SECONDS) * EPOCH_SECONDS;
     }
 }

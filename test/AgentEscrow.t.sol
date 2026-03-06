@@ -9,7 +9,6 @@ import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import {MockStakeManager} from "./mocks/MockStakeManager.sol";
 import {MockInsurancePool} from "./mocks/MockInsurancePool.sol";
 import {MockReputationRegistry} from "./mocks/MockReputationRegistry.sol";
-import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
 contract AgentEscrowTest is Test {
     AgentEscrow public escrow;

@@ -423,6 +423,7 @@ contract InsurancePool is IInsurancePool, ReentrancyGuard {
      * @return Epoch start timestamp
      */
     function _bucketEpochStart(uint256 timestamp) internal pure returns (uint256) {
+        // forge-lint: disable-next-line(divide-before-multiply)
         return (timestamp / EPOCH_SECONDS) * EPOCH_SECONDS;
     }
 
@@ -432,6 +433,7 @@ contract InsurancePool is IInsurancePool, ReentrancyGuard {
      * @return Day start timestamp
      */
     function _bucketDayStart(uint256 timestamp) internal pure returns (uint256) {
+        // forge-lint: disable-next-line(divide-before-multiply)
         return (timestamp / DAY_SECONDS) * DAY_SECONDS;
     }
 

@@ -141,8 +141,12 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
     // ══════════════════════════════════════════════════════════════════════════════
 
     modifier onlyArbiter() {
-        if (msg.sender != arbiter) revert OnlyArbiter();
+        _onlyArbiter();
         _;
+    }
+
+    function _onlyArbiter() internal view {
+        if (msg.sender != arbiter) revert OnlyArbiter();
     }
 
     // ══════════════════════════════════════════════════════════════════════════════
