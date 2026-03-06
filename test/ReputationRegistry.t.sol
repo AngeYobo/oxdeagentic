@@ -24,7 +24,7 @@ contract ReputationRegistryTest is Test {
     // Constructor Tests
     // ══════════════════════════════════════════════════════════════════════════════
 
-    function test_Constructor() public {
+    function test_Constructor() public view {
         assertEq(registry.escrow(), escrow);
         assertEq(registry.MAX_SCORE(), 1000);
         assertEq(registry.MAX_COUNTERPARTY_GAIN_PER_EPOCH(), 50);
@@ -171,6 +171,7 @@ contract ReputationRegistryTest is Test {
         // Build up to near max with multiple payers (skip address(0))
         // start from 1 not 0
         for (uint256 i = 1; i <= 20; i++) {
+            // forge-lint: disable-next-line(unsafe-typecast)
             registry.recordSuccess(provider, address(uint160(i)), 50);
         }
         // Score should be exactly 1000 (20 * 50)

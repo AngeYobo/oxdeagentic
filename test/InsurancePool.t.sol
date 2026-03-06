@@ -146,6 +146,7 @@ contract InsurancePoolTest is Test {
 
         // Transfer tokens first (simulating slash)
         vm.prank(stakeManager);
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
         token.transfer(address(pool), amount);
 
         // Notify
@@ -166,6 +167,7 @@ contract InsurancePoolTest is Test {
 
         // Transfer tokens first
         vm.prank(address(escrow));
+        // forge-lint: disable-next-line(erc20-unchecked-transfer)
         token.transfer(address(pool), amount);
 
         // Notify
@@ -347,7 +349,9 @@ contract InsurancePoolTest is Test {
         vm.prank(address(escrow));
         pool.authorizeClaim(intentId, payer, provider, address(token), 10 ether, 50 ether);
 
+        // forge-lint: disable-next-line(divide-before-multiply)
         uint256 epochStart = (block.timestamp / 28 days) * 28 days;
+        // forge-lint: disable-next-line(divide-before-multiply)
         uint256 dayStart = (block.timestamp / 1 days) * 1 days;
 
         // Buckets should not exist yet
@@ -379,6 +383,7 @@ contract InsurancePoolTest is Test {
         vm.prank(payer);
         pool.claim(intentId);
 
+        // forge-lint: disable-next-line(divide-before-multiply)
         uint256 epochStart = (block.timestamp / 28 days) * 28 days;
         IInsurancePool.Bucket memory epochBucket = pool.getEpochBucket(address(token), epochStart);
         uint128 originalOpening = epochBucket.openingBalance;
@@ -499,7 +504,9 @@ contract InsurancePoolTest is Test {
         pool.claim(intentId2);
 
         // Verify both epochs have separate buckets
+        // forge-lint: disable-next-line(divide-before-multiply)
         uint256 epoch1 = ((block.timestamp - 28 days) / 28 days) * 28 days;
+        // forge-lint: disable-next-line(divide-before-multiply)
         uint256 epoch2 = (block.timestamp / 28 days) * 28 days;
 
         IInsurancePool.Bucket memory bucket1 = pool.getEpochBucket(address(token), epoch1);
@@ -590,6 +597,7 @@ contract InsurancePoolTest is Test {
         vm.prank(depositor);
         pool.deposit(address(token), POOL_DEPOSIT);
 
+        // forge-lint: disable-next-line(unsafe-typecast)
         address testPayer = address(uint160(daysAgo + 1000)); // Unique address
         escrow.setFirstSeen(testPayer, uint64(block.timestamp - (daysAgo * 1 days)));
 
@@ -618,6 +626,7 @@ contract InsurancePoolTest is Test {
 
             if (claimAmount >= 1 ether) {
                 vm.prank(address(escrow));
+                // forge-lint: disable-next-line(unsafe-typecast)
                 pool.authorizeClaim(intentId, testPayer, provider, address(token), uint128(claimAmount), 100 ether);
 
                 vm.prank(testPayer);
@@ -707,6 +716,7 @@ contract InsurancePoolTest is Test {
         pool.claim(intentId2);
 
         // Verify both succeeded and day counter updated
+        // forge-lint: disable-next-line(divide-before-multiply)
         uint256 dayStart = (block.timestamp / 1 days) * 1 days;
         IInsurancePool.Bucket memory bucket = pool.getDayBucket(address(token), dayStart);
         assertEq(bucket.paid, 20 ether);

@@ -5,7 +5,6 @@ import {Test} from "forge-std/Test.sol";
 import {AgentEscrow} from "../src/AgentEscrow.sol";
 import {IAgentEscrow} from "../src/interfaces/IAgentEscrow.sol";
 import {MockERC20} from "./mocks/MockERC20.sol";
-import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import {MockStakeManager} from "./mocks/MockStakeManager.sol";
 import {MockInsurancePool} from "./mocks/MockInsurancePool.sol";
 import {MockReputationRegistry} from "./mocks/MockReputationRegistry.sol";
@@ -681,7 +680,7 @@ contract AgentEscrowTest is Test {
         assertTrue(intent.usedCredit);
     }
 
-    function test_Debug_MaxBondIsSet() public {
+    function test_Debug_MaxBondIsSet() public view {
         assertEq(escrow.MAX_BOND_PER_TOKEN(address(token)), 1000 ether);
     }
 
@@ -713,9 +712,6 @@ contract AgentEscrowTest is Test {
         uint256 payerBefore = token.balanceOf(payer);
         uint256 escrowBefore = token.balanceOf(address(escrow));
 
-        uint96 testAmount = 100 ether;
-        uint96 testBond = 10 ether;
-        bytes32 testSalt = keccak256("salt");
 
         // 1. Create: payer débité, escrow crédité
         bytes32 commitHash = keccak256(abi.encodePacked(provider, address(token), testAmount, testBond, testSalt));
@@ -759,10 +755,8 @@ contract AgentEscrowTest is Test {
     }
 
     function test_Security_RevealInvalidHash_WrongBond() public {
-        uint96 testAmount = 100 ether;
         uint96 correctBond = 10 ether;
         uint96 wrongBond = 20 ether;
-        bytes32 testSalt = keccak256("salt");
 
         // Create with bond=10
         bytes32 commitHash = keccak256(abi.encodePacked(provider, address(token), testAmount, correctBond, testSalt));
@@ -784,9 +778,6 @@ contract AgentEscrowTest is Test {
 
     /// @dev Verify token and amount are immutable after creation (custodial model)
     function test_Security_TokenAmountImmutable() public {
-        uint96 testAmount = 100 ether;
-        uint96 testBond = 10 ether;
-        bytes32 testSalt = keccak256("salt");
 
         bytes32 commitHash = keccak256(abi.encodePacked(provider, address(token), testAmount, testBond, testSalt));
 

@@ -8,7 +8,7 @@ contract MockStakeManager {
 
     mapping(bytes32 => bool) public lockedIntents;
 
-    function lockStake(address provider, address token, uint256 amount, bytes32 intentId) external {
+    function lockStake(address, address, uint256, bytes32 intentId) external {
         wasLockCalled = true;
         lockedIntents[intentId] = true;
     }
@@ -18,7 +18,7 @@ contract MockStakeManager {
         lockedIntents[intentId] = false;
     }
 
-    function slash(bytes32 intentId, uint256 amount) external {
+    function slash(bytes32 /*intentId*/, uint256 /*amount*/) external {
         wasSlashCalled = true;
     }
 

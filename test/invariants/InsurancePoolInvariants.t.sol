@@ -19,9 +19,9 @@ contract InsurancePoolHandler is Test {
     mapping(address => bool) public isPayer;
     mapping(address => bool) public isProvider;
 
-    uint256 public ghost_totalDeposited;
-    uint256 public ghost_totalClaimed;
-    uint256 public ghost_claimCount;
+    uint256 public ghostTotalDeposited;
+    uint256 public ghostTotalClaimed;
+    uint256 public ghostClaimCount;
 
     constructor(InsurancePool _pool, MockERC20 _token, MockAgentEscrow _escrow) {
         pool = _pool;
@@ -68,7 +68,7 @@ contract InsurancePoolHandler is Test {
         vm.prank(depositor);
         pool.deposit(address(token), amount);
 
-        ghost_totalDeposited += amount;
+        ghostTotalDeposited += amount;
     }
 
     function authorizeClaim(uint8 payerSeed, uint8 providerSeed, uint96 requestedAmount) public {
@@ -89,13 +89,13 @@ contract InsurancePoolHandler is Test {
         }
 
         // Generate intentId
-        bytes32 intentId = keccak256(abi.encodePacked(block.timestamp, payer, provider, ghost_claimCount));
+        bytes32 intentId = keccak256(abi.encodePacked(block.timestamp, payer, provider, ghostClaimCount));
         intentsList.push(intentId);
 
         // Authorize
         vm.prank(address(escrow));
         try pool.authorizeClaim(intentId, payer, provider, address(token), requestedAmount, requestedAmount * 2) {
-            ghost_claimCount++;
+            ghostClaimCount++;
         } catch {}
     }
 
@@ -112,7 +112,7 @@ contract InsurancePoolHandler is Test {
 
         vm.prank(claimData.payer);
         try pool.claim(intentId) {
-            ghost_totalClaimed += claimData.requestedAmount;
+            ghostTotalClaimed += claimData.requestedAmount;
         } catch {}
     }
 
@@ -163,7 +163,7 @@ contract InsurancePoolInvariantsTest is Test {
 
     /// @custom:invariant Accounting matches ghost variables
     function invariant_AccountingConsistent() public view {
-        uint256 expected = handler.ghost_totalDeposited() - handler.ghost_totalClaimed();
+        uint256 expected = handler.ghostTotalDeposited() - handler.ghostTotalClaimed();
         uint256 actual = pool.poolBalance(address(token));
 
         assertEq(actual, expected, "Accounting mismatch");

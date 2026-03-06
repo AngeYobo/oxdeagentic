@@ -116,15 +116,23 @@ contract InsurancePool is IInsurancePool, ReentrancyGuard {
     // ══════════════════════════════════════════════════════════════════════════════
 
     modifier onlyEscrow() {
-        if (msg.sender != escrow) revert OnlyEscrow();
+        _onlyEscrow();
         _;
     }
 
+    function _onlyEscrow() internal view {
+        if (msg.sender != escrow) revert OnlyEscrow();
+    }
+
     modifier onlyStakeManagerOrEscrow() {
+        _onlyStakeManagerOrEscrow();
+        _;
+    }
+
+    function _onlyStakeManagerOrEscrow() internal view {
         if (msg.sender != stakeManager && msg.sender != escrow) {
             revert OnlyStakeManagerOrEscrow();
         }
-        _;
     }
 
     // ══════════════════════════════════════════════════════════════════════════════
@@ -284,7 +292,9 @@ contract InsurancePool is IInsurancePool, ReentrancyGuard {
         claimData.status = ClaimStatus.CLAIMED;
 
         // Update all counters
+        // forge-lint: disable-next-line(unsafe-typecast)
         epochBucket[token][epochStart].paid += uint128(requestedAmount);
+        // forge-lint: disable-next-line(unsafe-typecast)
         dayBucket[token][dayStart].paid += uint128(requestedAmount);
         providerDayPaid[token][claimData.provider][dayStart] += requestedAmount;
         payerEpochPaid[token][claimData.payer][epochStart] += requestedAmount;
@@ -392,8 +402,10 @@ contract InsurancePool is IInsurancePool, ReentrancyGuard {
             uint256 currentBalance = poolBalance[token];
             require(currentBalance > 0, "pool empty");
 
+            // forge-lint: disable-next-line(unsafe-typecast)
             bucket.openingBalance = uint128(currentBalance);
 
+            // forge-lint: disable-next-line(unsafe-typecast)
             emit BucketOpened(token, "epoch", epochStart, uint128(currentBalance));
         }
     }
@@ -411,8 +423,10 @@ contract InsurancePool is IInsurancePool, ReentrancyGuard {
             uint256 currentBalance = poolBalance[token];
             require(currentBalance > 0, "pool empty");
 
+            // forge-lint: disable-next-line(unsafe-typecast)
             bucket.openingBalance = uint128(currentBalance);
 
+            // forge-lint: disable-next-line(unsafe-typecast)
             emit BucketOpened(token, "day", dayStart, uint128(currentBalance));
         }
     }
@@ -443,6 +457,7 @@ contract InsurancePool is IInsurancePool, ReentrancyGuard {
      * @return claimId Claim identifier
      */
     function _generateClaimId(bytes32 intentId) internal view returns (bytes32) {
+        // forge-lint: disable-next-line(asm-keccak256)
         return keccak256(abi.encodePacked(CHAIN_ID, address(this), intentId));
     }
 

@@ -108,6 +108,7 @@ contract ReputationRegistry is IReputationRegistry {
         unchecked {
             // Safe: actualGain <= 50, currentScore <= 1000, sum <= 1050
             uint256 sum = uint256(currentScore) + uint256(actualGain);
+            // forge-lint: disable-next-line(unsafe-typecast)
             newScore = sum > MAX_SCORE ? MAX_SCORE : uint16(sum);
         }
 
@@ -117,6 +118,7 @@ contract ReputationRegistry is IReputationRegistry {
         emit ReputationUpdated(
             provider,
             newScore,
+            // forge-lint: disable-next-line(unsafe-typecast)
             int16(uint16(actualGain)), // Cast via uint16 to prevent overflow
             payer,
             epochStart

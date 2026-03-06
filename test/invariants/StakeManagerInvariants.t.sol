@@ -15,10 +15,10 @@ contract StakeManagerHandler is Test {
     address[] public providersList;
     mapping(address => bool) public isProvider;
 
-    uint256 public ghost_totalDeposits;
-    uint256 public ghost_totalWithdrawals;
-    uint256 public ghost_totalSlashed;
-    uint256 public ghost_lockCount;
+    uint256 public ghostTotalDeposits;
+    uint256 public ghostTotalWithdrawals;
+    uint256 public ghostTotalSlashed;
+    uint256 public ghostLockCount;
 
     constructor(StakeManager _stakeManager, MockERC20 _token, address _escrow) {
         stakeManager = _stakeManager;
@@ -51,7 +51,7 @@ contract StakeManagerHandler is Test {
         vm.prank(provider);
         stakeManager.depositStake(address(token), amount);
 
-        ghost_totalDeposits += amount;
+        ghostTotalDeposits += amount;
     }
 
     function withdrawStake(uint8 providerSeed, uint96 amount) public {
@@ -67,7 +67,7 @@ contract StakeManagerHandler is Test {
         vm.prank(provider);
         stakeManager.withdrawStake(address(token), amount);
 
-        ghost_totalWithdrawals += amount;
+        ghostTotalWithdrawals += amount;
     }
 
     function lockStake(uint8 providerSeed, uint96 amount, bytes32 intentId) public {
@@ -82,7 +82,7 @@ contract StakeManagerHandler is Test {
 
         vm.prank(escrow);
         try stakeManager.lockStake(provider, address(token), amount, intentId) {
-            ghost_lockCount++;
+            ghostLockCount++;
         } catch {}
     }
 
@@ -101,7 +101,7 @@ contract StakeManagerHandler is Test {
 
         vm.prank(escrow);
         try stakeManager.slash(intentId, amount) {
-            ghost_totalSlashed += amount;
+            ghostTotalSlashed += amount;
         } catch {}
     }
 }
@@ -176,8 +176,8 @@ contract StakeManagerInvariantsTest is Test {
 
     /// @custom:invariant Accounting matches ghost variables
     function invariant_AccountingConsistent() public view {
-        uint256 netDeposits = handler.ghost_totalDeposits() - handler.ghost_totalWithdrawals();
-        uint256 expectedInContract = netDeposits - handler.ghost_totalSlashed();
+        uint256 netDeposits = handler.ghostTotalDeposits() - handler.ghostTotalWithdrawals();
+        uint256 expectedInContract = netDeposits - handler.ghostTotalSlashed();
         uint256 actualInContract = token.balanceOf(address(stakeManager));
 
         assertEq(actualInContract, expectedInContract, "Accounting mismatch");

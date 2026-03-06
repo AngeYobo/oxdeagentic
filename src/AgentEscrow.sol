@@ -229,6 +229,7 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
         }
 
         // Verify commit hash using STORED token/amount (custodial)
+        // forge-lint: disable-next-line(asm-keccak256)
         bytes32 computedHash = keccak256(
             abi.encodePacked(
                 provider,
@@ -400,6 +401,7 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
                 .authorizeClaim(
                     intentId, intent.payer, intent.provider, intent.token, insuranceAmount, uint128(intent.amount)
                 );
+            // forge-lint: disable-next-line(asm-keccak256)
             bytes32 expected = keccak256(abi.encodePacked(block.chainid, insurancePool, intentId));
             if (claimId != expected) revert BadClaimId();
         }
@@ -438,6 +440,7 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
         if (credit.status == IAgentEscrow.CreditStatus.ACTIVE) {
             // Add to existing credit
             credit.remainingAmount += amount;
+            // forge-lint: disable-next-line(unsafe-typecast)
             credit.expiresAt = uint64(block.timestamp + CREDIT_EXPIRY);
         } else {
             // Create new credit
@@ -447,6 +450,7 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
                 grantedAmount: amount,
                 remainingAmount: amount,
                 grantedAt: uint64(block.timestamp),
+                // forge-lint: disable-next-line(unsafe-typecast)
                 expiresAt: uint64(block.timestamp + CREDIT_EXPIRY),
                 status: IAgentEscrow.CreditStatus.ACTIVE
             });
@@ -541,6 +545,7 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
      * @return intentId IAgentEscrow.Intent identifier
      */
     function _generateIntentId(address payer, bytes32 commitHash, uint64 nonce) internal view returns (bytes32) {
+        // forge-lint: disable-next-line(asm-keccak256)
         return keccak256(abi.encodePacked(CHAIN_ID, address(this), payer, commitHash, nonce));
     }
 
@@ -551,6 +556,7 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
      * @return creditId Credit identifier
      */
     function _getCreditId(address payer, address token) internal pure returns (bytes32) {
+        // forge-lint: disable-next-line(asm-keccak256)
         return keccak256(abi.encodePacked(payer, token));
     }
 }
