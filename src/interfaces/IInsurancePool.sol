@@ -192,7 +192,7 @@ interface IInsurancePool {
 
     function providerDayPaid(address token, address provider, uint256 dayStart) external view returns (uint256);
     function payerEpochPaid(address token, address payer, uint256 epochStart) external view returns (uint256);
-    function MAX_PAYER_PAYOUT_PER_TOKEN(address token) external view returns (uint256);
+    function maxPayerPayoutPerToken(address token) external view returns (uint256);
 
     function escrow() external view returns (address);
     function stakeManager() external view returns (address);

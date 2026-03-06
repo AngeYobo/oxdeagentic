@@ -71,15 +71,19 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
     // ══════════════════════════════════════════════════════════════════════════════
 
     /// @notice StakeManager contract
+    // forge-lint: disable-next-line(screaming-snake-case-immutable)
     address public immutable stakeManager;
 
     /// @notice InsurancePool contract
+    // forge-lint: disable-next-line(screaming-snake-case-immutable)
     address public immutable insurancePool;
 
     /// @notice ReputationRegistry contract
+    // forge-lint: disable-next-line(screaming-snake-case-immutable)
     address public immutable reputationRegistry;
 
     /// @notice Arbiter address (trusted dispute resolver)
+    // forge-lint: disable-next-line(screaming-snake-case-immutable)
     address public immutable arbiter;
 
     // ══════════════════════════════════════════════════════════════════════════════
@@ -99,9 +103,11 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
     mapping(address => uint64) public firstSeen;
 
     /// @notice Maximum bond per token (governance parameter)
+    // forge-lint: disable-next-line(mixed-case-variable)
     mapping(address => uint256) public MAX_BOND_PER_TOKEN;
 
     /// @notice Maximum payout per token (governance parameter)
+    // forge-lint: disable-next-line(mixed-case-variable)
     mapping(address => uint256) public MAX_PAYER_PAYOUT_PER_TOKEN;
 
     mapping(address => uint64) public nonces;
@@ -440,6 +446,7 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
         if (credit.status == IAgentEscrow.CreditStatus.ACTIVE) {
             // Add to existing credit
             credit.remainingAmount += amount;
+            // casting to uint64 is safe because block.timestamp fits into uint64 for the foreseeable future
             // forge-lint: disable-next-line(unsafe-typecast)
             credit.expiresAt = uint64(block.timestamp + CREDIT_EXPIRY);
         } else {
@@ -450,6 +457,7 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
                 grantedAmount: amount,
                 remainingAmount: amount,
                 grantedAt: uint64(block.timestamp),
+                // casting to uint64 is safe because block.timestamp fits into uint64 for the foreseeable future
                 // forge-lint: disable-next-line(unsafe-typecast)
                 expiresAt: uint64(block.timestamp + CREDIT_EXPIRY),
                 status: IAgentEscrow.CreditStatus.ACTIVE
@@ -507,6 +515,20 @@ contract AgentEscrow is IAgentEscrow, ReentrancyGuard {
 
         return credit.status == IAgentEscrow.CreditStatus.ACTIVE && credit.remainingAmount >= amount
             && block.timestamp <= credit.expiresAt;
+    }
+
+    /**
+     * @inheritdoc IAgentEscrow
+     */
+    function maxBondPerToken(address token) external view returns (uint256) {
+        return MAX_BOND_PER_TOKEN[token];
+    }
+
+    /**
+     * @inheritdoc IAgentEscrow
+     */
+    function maxPayerPayoutPerToken(address token) external view returns (uint256) {
+        return MAX_PAYER_PAYOUT_PER_TOKEN[token];
     }
 
     // ══════════════════════════════════════════════════════════════════════════════

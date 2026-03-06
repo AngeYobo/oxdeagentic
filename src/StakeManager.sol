@@ -16,10 +16,10 @@ import {IInsurancePool} from "./interfaces/IInsurancePool.sol";
  * - INV-1: Slash ≤50% of locked stake (hard revert, never clamp)
  * - totalStake = lockedStake + availableStake (always)
  * - Intent locks are unique (no double-lock)
- * - Only escrow can lock/unlock/slash
+ * - Only ESCROW can lock/unlock/slash
  *
  * Security:
- * - Immutable dependencies (escrow, insurancePool)
+ * - Immutable dependencies (ESCROW, INSURANCE_POOL)
  * - ReentrancyGuard on deposit/withdraw
  * - SafeERC20 for token transfers
  * - Access control via onlyEscrow modifier
@@ -42,10 +42,10 @@ contract StakeManager is IStakeManager, ReentrancyGuard {
     // ══════════════════════════════════════════════════════════════════════════════
 
     /// @notice AgentEscrow contract (only authorized caller)
-    address public immutable escrow;
+    address public immutable ESCROW;
 
     /// @notice InsurancePool contract (receives slashed funds)
-    address public immutable insurancePool;
+    address public immutable INSURANCE_POOL;
 
     // ══════════════════════════════════════════════════════════════════════════════
     // Storage
@@ -76,8 +76,8 @@ contract StakeManager is IStakeManager, ReentrancyGuard {
         if (_escrow == address(0)) revert ZeroAddress();
         if (_insurancePool == address(0)) revert ZeroAddress();
 
-        escrow = _escrow;
-        insurancePool = _insurancePool;
+        ESCROW = _escrow;
+        INSURANCE_POOL = _insurancePool;
     }
 
     // ══════════════════════════════════════════════════════════════════════════════
@@ -90,7 +90,7 @@ contract StakeManager is IStakeManager, ReentrancyGuard {
     }
 
     function _onlyEscrow() internal view {
-        if (msg.sender != escrow) revert OnlyEscrow();
+        if (msg.sender != ESCROW) revert OnlyEscrow();
     }
 
     // ══════════════════════════════════════════════════════════════════════════════
@@ -167,7 +167,7 @@ contract StakeManager is IStakeManager, ReentrancyGuard {
             provider: provider,
             token: token,
             // forge-lint: disable-next-line(unsafe-typecast)
-            amount: uint96(amount), // Safe: checked in escrow
+            amount: uint96(amount), // Safe: checked in ESCROW
             active: true
         });
 
@@ -227,10 +227,10 @@ contract StakeManager is IStakeManager, ReentrancyGuard {
         lock.amount -= uint96(amount); // Safe: amount <= lock.amount by cap check
 
         // Transfer slashed tokens to InsurancePool
-        IERC20(token).safeTransfer(insurancePool, amount);
+        IERC20(token).safeTransfer(INSURANCE_POOL, amount);
 
         // Notify InsurancePool of accounting (no transferFrom)
-        IInsurancePool(insurancePool).notifyDepositFromStake(token, amount);
+        IInsurancePool(INSURANCE_POOL).notifyDepositFromStake(token, amount);
 
         emit StakeSlashed(intentId, provider, token, amount);
     }
@@ -271,5 +271,19 @@ contract StakeManager is IStakeManager, ReentrancyGuard {
      */
     function intentLocks(bytes32 intentId) external view returns (StakeLock memory) {
         return _intentLocks[intentId];
+    }
+
+    /**
+     * @inheritdoc IStakeManager
+     */
+    function escrow() external view returns (address) {
+        return ESCROW;
+    }
+
+    /**
+     * @inheritdoc IStakeManager
+     */
+    function insurancePool() external view returns (address) {
+        return INSURANCE_POOL;
     }
 }

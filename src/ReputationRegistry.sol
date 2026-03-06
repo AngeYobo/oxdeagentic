@@ -6,12 +6,12 @@ import {IReputationRegistry} from "./interfaces/IReputationRegistry.sol";
 /**
  * @title ReputationRegistry
  * @notice Tracks provider reputation with bounded counterparty gains (INV-5)
- * @dev Phase 0: Pure reputation tracking, no slashing. Immutable escrow reference.
+ * @dev Phase 0: Pure reputation tracking, no slashing. Immutable ESCROW reference.
  *
  * Invariants:
  * - INV-5: Max 50 points per counterparty per epoch (5% of 1000 max score)
  * - Score never exceeds 1000
- * - Only escrow can modify scores
+ * - Only ESCROW can modify scores
  * - Epochs are deterministic (28 days)
  */
 contract ReputationRegistry is IReputationRegistry {
@@ -33,7 +33,7 @@ contract ReputationRegistry is IReputationRegistry {
     // ══════════════════════════════════════════════════════════════════════════════
 
     /// @notice AgentEscrow contract (only authorized caller)
-    address public immutable escrow;
+    address public immutable ESCROW;
 
     // ══════════════════════════════════════════════════════════════════════════════
     // Storage
@@ -51,12 +51,12 @@ contract ReputationRegistry is IReputationRegistry {
     // ══════════════════════════════════════════════════════════════════════════════
 
     /**
-     * @notice Initialize registry with escrow address
+     * @notice Initialize registry with ESCROW address
      * @param _escrow AgentEscrow contract address (immutable)
      */
     constructor(address _escrow) {
-        require(_escrow != address(0), "zero escrow");
-        escrow = _escrow;
+        require(_escrow != address(0), "zero ESCROW");
+        ESCROW = _escrow;
     }
 
     // ══════════════════════════════════════════════════════════════════════════════
@@ -69,7 +69,7 @@ contract ReputationRegistry is IReputationRegistry {
     }
 
     function _onlyEscrow() internal view {
-        if (msg.sender != escrow) revert OnlyEscrow();
+        if (msg.sender != ESCROW) revert OnlyEscrow();
     }
 
     // ══════════════════════════════════════════════════════════════════════════════
@@ -145,5 +145,12 @@ contract ReputationRegistry is IReputationRegistry {
     function getCurrentEpoch() public view returns (uint256) {
         // forge-lint: disable-next-line(divide-before-multiply)
         return (block.timestamp / EPOCH_SECONDS) * EPOCH_SECONDS;
+    }
+
+    /**
+     * @notice Get immutable escrow address
+     */
+    function escrow() external view returns (address) {
+        return ESCROW;
     }
 }

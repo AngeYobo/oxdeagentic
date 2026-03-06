@@ -163,8 +163,8 @@ interface IAgentEscrow {
     function reputationRegistry() external view returns (address);
     function arbiter() external view returns (address);
     function firstSeen(address payer) external view returns (uint64);
-    function MAX_BOND_PER_TOKEN(address token) external view returns (uint256);
-    function MAX_PAYER_PAYOUT_PER_TOKEN(address token) external view returns (uint256);
+    function maxBondPerToken(address token) external view returns (uint256);
+    function maxPayerPayoutPerToken(address token) external view returns (uint256);
 
     function REVEAL_DEADLINE() external view returns (uint256);
     function SETTLEMENT_DEADLINE() external view returns (uint256);

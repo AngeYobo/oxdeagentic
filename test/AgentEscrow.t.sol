@@ -681,7 +681,7 @@ contract AgentEscrowTest is Test {
     }
 
     function test_Debug_MaxBondIsSet() public view {
-        assertEq(escrow.MAX_BOND_PER_TOKEN(address(token)), 1000 ether);
+        assertEq(escrow.maxBondPerToken(address(token)), 1000 ether);
     }
 
     // ❌ MANQUANT: Settlement après révocation allowance (devrait passer)
@@ -711,7 +711,6 @@ contract AgentEscrowTest is Test {
 
         uint256 payerBefore = token.balanceOf(payer);
         uint256 escrowBefore = token.balanceOf(address(escrow));
-
 
         // 1. Create: payer débité, escrow crédité
         bytes32 commitHash = keccak256(abi.encodePacked(provider, address(token), testAmount, testBond, testSalt));
@@ -778,7 +777,6 @@ contract AgentEscrowTest is Test {
 
     /// @dev Verify token and amount are immutable after creation (custodial model)
     function test_Security_TokenAmountImmutable() public {
-
         bytes32 commitHash = keccak256(abi.encodePacked(provider, address(token), testAmount, testBond, testSalt));
 
         vm.startPrank(payer);

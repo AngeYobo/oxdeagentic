@@ -10,7 +10,7 @@ import {IAgentEscrow} from "./interfaces/IAgentEscrow.sol";
 /**
  * @title InsurancePool
  * @notice Insurance pool with deterministic bucket-based caps (INV-3)
- * @dev Phase 0: Bucket snapshots, age ramp, claim authorization from escrow
+ * @dev Phase 0: Bucket snapshots, age ramp, claim authorization from ESCROW
  *
  * Invariants:
  * - INV-3: Multi-tier caps (epoch/day/provider-day/payer-epoch/age-adjusted absolute)
@@ -20,7 +20,7 @@ import {IAgentEscrow} from "./interfaces/IAgentEscrow.sol";
  * - Claims expire after 90 days
  *
  * Security:
- * - Immutable dependencies (escrow, stakeManager)
+ * - Immutable dependencies (ESCROW, STAKE_MANAGER)
  * - ReentrancyGuard on deposit/claim
  * - SafeERC20 for all transfers
  * - Strict access control (onlyEscrow, onlyStakeManagerOrEscrow)
@@ -60,10 +60,10 @@ contract InsurancePool is IInsurancePool, ReentrancyGuard {
     // ══════════════════════════════════════════════════════════════════════════════
 
     /// @notice AgentEscrow contract (claim authorizer + firstSeen oracle)
-    address public immutable escrow;
+    address public immutable ESCROW;
 
     /// @notice StakeManager contract (authorized depositor)
-    address public immutable stakeManager;
+    address public immutable STAKE_MANAGER;
 
     // ══════════════════════════════════════════════════════════════════════════════
     // Storage
@@ -73,7 +73,7 @@ contract InsurancePool is IInsurancePool, ReentrancyGuard {
     mapping(address => uint256) public poolBalance;
 
     /// @notice Maximum payout per token (0 = unsupported)
-    mapping(address => uint256) public MAX_PAYER_PAYOUT_PER_TOKEN;
+    mapping(address => uint256) public maxPayerPayoutPerToken;
 
     /// @notice Epoch buckets per token
     mapping(address => mapping(uint256 => Bucket)) public epochBucket;
@@ -106,8 +106,8 @@ contract InsurancePool is IInsurancePool, ReentrancyGuard {
         if (_escrow == address(0)) revert InvalidAmount();
         if (_stakeManager == address(0)) revert InvalidAmount();
 
-        escrow = _escrow;
-        stakeManager = _stakeManager;
+        ESCROW = _escrow;
+        STAKE_MANAGER = _stakeManager;
         CHAIN_ID = block.chainid;
     }
 
@@ -121,7 +121,7 @@ contract InsurancePool is IInsurancePool, ReentrancyGuard {
     }
 
     function _onlyEscrow() internal view {
-        if (msg.sender != escrow) revert OnlyEscrow();
+        if (msg.sender != ESCROW) revert OnlyEscrow();
     }
 
     modifier onlyStakeManagerOrEscrow() {
@@ -130,7 +130,7 @@ contract InsurancePool is IInsurancePool, ReentrancyGuard {
     }
 
     function _onlyStakeManagerOrEscrow() internal view {
-        if (msg.sender != stakeManager && msg.sender != escrow) {
+        if (msg.sender != STAKE_MANAGER && msg.sender != ESCROW) {
             revert OnlyStakeManagerOrEscrow();
         }
     }
@@ -187,7 +187,7 @@ contract InsurancePool is IInsurancePool, ReentrancyGuard {
         // Validation
         if (requestedAmount == 0) revert ZeroAmount();
         if (requestedAmount > intentAmount) revert InvalidAmount();
-        if (MAX_PAYER_PAYOUT_PER_TOKEN[token] == 0) revert TokenNotSupported();
+        if (maxPayerPayoutPerToken[token] == 0) revert TokenNotSupported();
 
         // Generate claimId
         claimId = _generateClaimId(intentId);
@@ -368,10 +368,10 @@ contract InsurancePool is IInsurancePool, ReentrancyGuard {
      * @return Age-adjusted maximum payout
      */
     function _getAgeAdjustedCap(address token, address payer) internal view returns (uint256) {
-        uint256 absoluteCap = MAX_PAYER_PAYOUT_PER_TOKEN[token];
+        uint256 absoluteCap = maxPayerPayoutPerToken[token];
 
-        // Get firstSeen from escrow
-        uint64 firstSeenTimestamp = IAgentEscrow(escrow).firstSeen(payer);
+        // Get firstSeen from ESCROW
+        uint64 firstSeenTimestamp = IAgentEscrow(ESCROW).firstSeen(payer);
 
         // If never seen, 0% eligibility
         if (firstSeenTimestamp == 0) return 0;
@@ -485,12 +485,26 @@ contract InsurancePool is IInsurancePool, ReentrancyGuard {
      * @param maxPayout Maximum payout amount
      */
     function setMaxPayerPayoutPerToken(address token, uint256 maxPayout) external onlyEscrow {
-        MAX_PAYER_PAYOUT_PER_TOKEN[token] = maxPayout;
+        maxPayerPayoutPerToken[token] = maxPayout;
     }
 
     // ══════════════════════════════════════════════════════════════════════════════
     // Convenience View Functions (for cleaner external access)
     // ══════════════════════════════════════════════════════════════════════════════
+
+    /**
+     * @inheritdoc IInsurancePool
+     */
+    function escrow() external view returns (address) {
+        return ESCROW;
+    }
+
+    /**
+     * @inheritdoc IInsurancePool
+     */
+    function stakeManager() external view returns (address) {
+        return STAKE_MANAGER;
+    }
 
     /**
      * @notice Get claim as struct (convenience function for tests/external integrations)

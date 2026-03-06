@@ -18,7 +18,13 @@ contract MockStakeManager {
         lockedIntents[intentId] = false;
     }
 
-    function slash(bytes32 /*intentId*/, uint256 /*amount*/) external {
+    function slash(
+        bytes32,
+        /*intentId*/
+        uint256 /*amount*/
+    )
+        external
+    {
         wasSlashCalled = true;
     }
 
